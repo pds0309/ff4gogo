@@ -10,6 +10,15 @@ buildscript {
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
         classpath "io.spring.gradle:dependency-management-plugin:1.0.11.RELEASE"
+        classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.8.2'
+    }
+}
+
+allprojects {
+    apply plugin: 'com.github.kt3k.coveralls'
+    apply plugin: 'jacoco'
+    repositories {
+        mavenCentral()
     }
 }
 
@@ -39,6 +48,13 @@ subprojects {
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
         implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     }
+
+    jacocoTestReport {
+        reports {
+            html.enabled = true // 개발자 확인용
+            xml.enabled = true // coveralls 전송용
+        }
+    }
 }
 project(':common'){
     bootJar { enabled = false }
@@ -64,4 +80,29 @@ project(':schedule'){
         implementation group: 'org.jsoup', name: 'jsoup', version: '1.13.1'
         implementation project(':common')
     }
+}
+
+
+task jacocoRootReport(type: JacocoReport) {
+    description = 'Generates an aggregate report from all subprojects'
+    dependsOn = subprojects.test
+    classDirectories.from = files(subprojects.sourceSets.main.allSource.srcDirs)
+    classDirectories.from =  files(subprojects.sourceSets.main.output)
+    executionData.from = files(subprojects.jacocoTestReport.executionData)
+    reports {
+        html.enabled = true // human readable
+        xml.enabled = true // required by coveralls
+    }
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect{
+            fileTree(dir: it, excludes: [
+                    "com/pds/**/*Application.*"
+            ])
+        }))
+    }
+}
+
+coveralls {
+    sourceDirs = subprojects.sourceSets.main.allSource.srcDirs.flatten()
+    jacocoReportPath = "${buildDir}/reports/jacoco/jacocoRootReport/jacocoRootReport.xml"
 }
