@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
@@ -32,4 +33,22 @@ class RankerMatchTest {
         assertEquals(foundRankerMatch.getMatchHit(),rankerMatch.getMatchHit());
     }
 
+    @Test
+    void setZeroTest(){
+        RankerMatchId rankerMatchId = new RankerMatchId("ABCD","USER1");
+        RankerMatch rankerMatch = new RankerMatch(rankerMatchId,1);
+        testEntityManager.persistAndFlush(rankerMatch);
+        rankerMatchRepository.updateAllZero();
+        assertEquals(0, rankerMatchRepository.findById(rankerMatchId).orElse(null).getMatchHit());
+    }
+
+    @Test
+    void deleteMatchesNotUsedTest(){
+        testEntityManager.persistAndFlush(new RankerMatch(new RankerMatchId("A","U1"),0));
+        testEntityManager.persistAndFlush(new RankerMatch(new RankerMatchId("B","U1"),1));
+        testEntityManager.persistAndFlush(new RankerMatch(new RankerMatchId("C","U1"),0));
+        assertEquals(3,rankerMatchRepository.count());
+        rankerMatchRepository.deleteMatchesNotUsed("U1");
+        assertEquals(1,rankerMatchRepository.count());
+    }
 }

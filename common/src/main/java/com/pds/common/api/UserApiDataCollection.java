@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 public class UserApiDataCollection {
 
     private final Fifa4SearchUserMatchApi matchApi;
+    private final Fifa4SearchUserApi userApi;
 
     // 유저 Id , 조회할 경기 수로 경기 코드 목록을 조회하여 리턴합니다.
     public List<String> getUserMatchesFromApi(String userId, int matchNum) {
@@ -30,5 +31,9 @@ public class UserApiDataCollection {
     // 매치코드 리스트를 매치 세부정보 리스트로 리턴합니다.
     public List<String> getUserMatchesDetailFromApi(List<String> matchCode){
         return matchCode.stream().map(matchApi::getUserMatchDetail).collect(Collectors.toList());
+    }
+
+    public String getUserIdFromNickName(String name){
+        return userApi.getUserAccessId(userApi.getUserInfo(name));
     }
 }
