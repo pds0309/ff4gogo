@@ -4,7 +4,6 @@ package com.pds.common.api;
 import com.pds.common.config.Fifa4Api;
 import com.pds.common.dto.PlayerDto;
 import com.pds.common.dto.SeasonDto;
-import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +23,6 @@ class Fifa4PlayerApiTest {
     @Test
     void getPlayerMetaDataTest(){
         String res = "{data: [{\"id\": 507261070, \"name\": \"켄자바예프\" }]}";
-        JSONObject jsonObject = new JSONObject(res);
         List<PlayerDto.PlayerApiResponse> playerApiResponseList =  fifa4PlayerApi.fromJSONtoPlayer(res);
         assertEquals("켄자바예프",playerApiResponseList.get(0).getPlayerName());
         assertEquals(507261070,playerApiResponseList.get(0).getPlayerId());
