@@ -81,12 +81,16 @@ class HomeControllerTest {
 
         MvcResult mvcResult = mvc.perform(get("/")).andExpect(status().isOk())
                 .andExpect(model().attributeExists("toprating"))
+                .andExpect(model().attribute("standardcnt",2))
         .andExpect(model().attributeExists("thisseason"))
         .andExpect(model().attribute("topgoal",statDtoList))
                 .andExpect(model().attribute("toprating",statDtoList))
                 .andReturn();
-        ;
-//        System.out.println(mvcResult.getResponse().getContentAsString());
 
+        List<StatDto.Info> resultList = (ArrayList) mvcResult.getRequest().getAttribute("toprating");
+        assertEquals(statDtoList,resultList);
+
+        StatDto.Info result0TopGoal = ((StatDto.Info) ((ArrayList) mvcResult.getRequest().getAttribute("topgoal")).get(0));
+        assertEquals(statDtoList.get(0),result0TopGoal);
     }
 }
