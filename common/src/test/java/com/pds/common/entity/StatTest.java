@@ -58,4 +58,14 @@ class StatTest {
         assertEquals(foundStat.getGoal() ,stat.getGoal());
     }
 
+    @Test
+    void findTop1StatIdOrderByStatIdDescTest(){
+        Stat stat = new Stat(new StatId(testEntityManager.find(Player.class,101123),202109),1,1,1,1,1);
+        Stat stat2 = new Stat(new StatId(testEntityManager.find(Player.class,101123),202108),1,1,1,1,1);
+        testEntityManager.persistAndFlush(stat);
+        testEntityManager.persistAndFlush(stat2);
+
+        assertEquals(202109 , statRepository.findTopStatIdMatchSidByOrderByStatIdMatchSidDesc().getStatIdMatchSid());
+    }
+
 }
