@@ -18,10 +18,15 @@ class EnumTest {
     }
 
     @Test
-    void getEnhanceTest(){
+    void getEnhanceMapTest(){
         Map<Integer , Integer> enMap = Enhances.getEnhanceMap();
         assertNotNull(enMap);
         assertEquals(11,enMap.size());
+    }
+
+    @Test
+    void getEnhanceTest(){
+        assertEquals(22 , Enhances.getOverall(9));
     }
 
     @Test
@@ -30,7 +35,7 @@ class EnumTest {
         String rootPos = Positions.getPos(26).getRootPosInfo();
         assertEquals("SUB",pos);
         assertEquals("FW",rootPos);
-
+        assertEquals(26,Positions.getPos(26).getPosCode());
         assertEquals(Positions.valueOf("SUB"),Positions.getPos(28));
     }
 
