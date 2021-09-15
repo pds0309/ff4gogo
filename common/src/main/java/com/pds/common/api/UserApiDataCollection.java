@@ -1,8 +1,10 @@
 package com.pds.common.api;
 
 
+import com.pds.common.dto.UsersDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -33,7 +35,12 @@ public class UserApiDataCollection {
         return matchCode.stream().map(matchApi::getUserMatchDetail).collect(Collectors.toList());
     }
 
-    public String getUserIdFromNickName(String name){
-        return userApi.getUserAccessId(userApi.getUserInfo(name));
+
+    public UsersDto.UserApiResponse getUserInfo(String name){
+        return userApi.fromJSONtoUser(userApi.getUserInfo(name));
+    }
+
+    public int getUserRank(String userId){
+        return userApi.fromJSONtoUserRank(userApi.getRankFromUserId(userId));
     }
 }
