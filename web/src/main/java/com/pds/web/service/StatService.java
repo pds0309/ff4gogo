@@ -27,7 +27,7 @@ public class StatService {
 
     public int getCnt75(int curMatchSeason){
         List<Integer> cntList = statRepository.findCnt(curMatchSeason);
-        return cntList.get((int)(cntList.size()*0.75));
+        return cntList.get((int)(cntList.size()*0.85));
     }
 
     public List<StatDto.Info> getTopGoalPlayers(int curSeason , int cnt75){

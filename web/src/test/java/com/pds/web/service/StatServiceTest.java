@@ -56,7 +56,7 @@ class StatServiceTest {
     void cnt75Test(){
         List<Integer> cntList = Arrays.asList(1,2,3,4,5,6,7,8,9,10);
         given(statRepository.findCnt(202109)).willReturn(cntList);
-        assertEquals(8,statService.getCnt75(202109));
+        assertEquals(9,statService.getCnt75(202109));
     }
     @Test
     void getThisSeasonTest(){
