@@ -18,6 +18,7 @@ public class HomeController {
         int thisSeason = statService.getThisSeason();
         int cnt = statService.getCnt75(thisSeason);
         model.addAttribute("thisseason",thisSeason);
+        model.addAttribute("standardcnt",cnt);
         model.addAttribute("matchnum",statService.getThisSeasonMatchNum(thisSeason));
 
         model.addAttribute("topgoal",statService.getTopGoalPlayers(thisSeason,cnt));
