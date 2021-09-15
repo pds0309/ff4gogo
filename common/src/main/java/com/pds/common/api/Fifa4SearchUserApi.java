@@ -1,6 +1,9 @@
 package com.pds.common.api;
 
+import com.pds.common.dto.UsersDto;
 import lombok.RequiredArgsConstructor;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -27,7 +30,35 @@ public class Fifa4SearchUserApi {
             return null;
         }
     }
-    public String getUserAccessId(String reseponse){
-        return new JSONObject(reseponse).getString("accessId");
+
+    public UsersDto.UserApiResponse fromJSONtoUser(String result){
+        try{
+            UsersDto.UserApiResponse userDto = (result!=null)? new UsersDto.UserApiResponse(new JSONObject(result)) : null;
+            return userDto;
+        }
+        catch(JSONException e){
+            return null;
+        }
+    }
+
+
+    // 유저 아이디로 랭크 정보를 얻기
+    public String getRankFromUserId(String userId){
+        ResponseEntity<String> responseEntity = restTemplate.exchange("https://api.nexon.co.kr/fifaonline4/v1.0/users/"+userId+"/maxdivision", HttpMethod.GET, requestEntity, String.class);
+        String response = responseEntity.getBody();
+        return "{data: " + response + "}";
+    }
+    public int fromJSONtoUserRank(String result) {
+        JSONObject jsonObject = new JSONObject(result);
+        JSONArray jsonArray = jsonObject.getJSONArray("data");
+
+        if (jsonArray.length() != 0 && ((JSONObject) jsonArray.get(0)).getInt("matchType") == 50) {
+            return ((JSONObject) jsonArray.get(0)).getInt("division");
+        } else
+        // 개인 순위경기 기록이 없을 때
+        // key : -1  value : unrank
+        {
+            return -1;
+        }
     }
 }
