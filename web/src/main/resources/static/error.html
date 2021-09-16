@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>피온4고고 ERROR</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/15181efa86.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="/css/bulma.css">
+    <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+<section class="hero is-medium has-text-centered">
+    <div class="hero-body">
+        <div class="container has-text-centered has-text-white">
+            <h1 class="title is-2">피온4 고고</h1>
+            <br>
+            <p class="is-size-3 has-text-danger" th:text="|${errorcode}&nbsp;-&nbsp;${errorname}|">404 ERROR</p>
+            <p class="is-size-5" th:text="${errormsg}">페이지를 찾을 수 없네요.</p>
+            <br><br><br><br><br>
+            <a href="/" class="button is-white is-medium is-inverted has-text-weight-bold">메인으로&nbsp;<i class="fa fa-home"></i>
+            </a>
+        </div>
+    </div>
+</section>
+<section id="parallax-2" class="hero is-small">
+    <div class="hero-body">
+        <div class="container has-text-white has-text-centered">
+            <p class="is-size-4 is-size-6-mobile">문의 : <a href="mailto:ehd0309@naver.com">ehd0309@naver.com<i class="fa fa-envelope-square"></i></a></p>
+            <br><br>
+        </div>
+    </div>
+</section>
+<br><br>
+<footer class="footer">
+    <div class="content has-text-centered">
+        <p>
+            <strong><a href="https://jgthms.com">FifaOnline4 Open-Api</a></strong> based. <br>
+            &copy;2021 pds0309 <a href="mailto:ehd0309@naver.com"><i class="fa fa-envelope-square"></i></a>
+        </p>
+    </div>
+</footer>
+</body>
+</html>
