@@ -6,10 +6,11 @@ import com.pds.web.exception.UserRequestException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-
+import org.springframework.web.servlet.ModelAndView;
 
 
 import javax.servlet.http.HttpServletRequest;
@@ -28,6 +29,7 @@ public class ApiExceptionHandler{
                 e.getMessage(), e.getCode(), HttpStatus.BAD_REQUEST, null, request.getRequestURI());
     }
 
+    //TODO 로직-컨트롤러 추가 후 테스트
     @ExceptionHandler(value = {MissingServletRequestParameterException.class})
     public ResponseEntity<Object> handleMissParamException(MissingServletRequestParameterException e, HttpServletRequest request) {
         basicLogs(request);
@@ -37,7 +39,34 @@ public class ApiExceptionHandler{
                 paramError.getErrorMsg(), paramError.getErrorCode(), HttpStatus.BAD_REQUEST, null, request.getRequestURI());
     }
 
+    //405
+    @ExceptionHandler(value = {HttpRequestMethodNotSupportedException.class})
+    public ModelAndView handleNotAllowedMethodException(HttpRequestMethodNotSupportedException e,HttpServletRequest request){
+        basicLogs(request);
+        simpleExceptionLog(e);
+        ModelAndView mav = new ModelAndView();
+        mav.addObject("errorcode",HttpStatus.METHOD_NOT_ALLOWED.value());
+        mav.addObject("errorname",HttpStatus.METHOD_NOT_ALLOWED.getReasonPhrase());
+        mav.addObject("errormsg","["+ ErrorInfo.METHOD_INVALID.getErrorCode()+"] \n" + ErrorInfo.METHOD_INVALID.getErrorMsg() + e.getMessage());
+        mav.setViewName("error");
+        return mav;
+    }
 
+    //TODO 향후 해당 예외 발견될 경우 따로 예외 처리한다.
+    @ExceptionHandler(value = {Exception.class})
+    public ModelAndView handleAllException(final Exception e, HttpServletRequest request){
+        basicLogs(request);
+        log.info("===============exception detail============");
+        log.info(e);
+        log.info("===========================================");
+        ModelAndView mav = new ModelAndView();
+        mav.addObject("errorcode",HttpStatus.INTERNAL_SERVER_ERROR.value());
+        mav.addObject("errorname",HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+        mav.addObject("errormsg","["+ErrorInfo.SERVER_ERROR.getErrorCode()+"] \n"
+         + ErrorInfo.SERVER_ERROR.getErrorMsg());
+        mav.setViewName("error");
+        return mav;
+    }
 
     public void basicLogs(HttpServletRequest request){
         Map<String, String> map = new HashMap<>();

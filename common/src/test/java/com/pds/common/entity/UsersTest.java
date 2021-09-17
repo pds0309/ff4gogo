@@ -44,7 +44,7 @@ class UsersTest {
     @Test
     void findIgnoreCaseUserTest(){
         entityManager.persistAndFlush(users);
-        Users found = usersRepository.findByUserNameIsIgnoreCase("yOUTUBE윤보미");
+        Users found = usersRepository.findByUserNameIsIgnoreCase("yOUTUBE윤보미").orElse(null);
         assertNotNull(found);
         assertEquals(users.getUserName(),found.getUserName());
     }
@@ -65,5 +65,12 @@ class UsersTest {
         UsersDto.Info userDto = new UsersDto.Info(dto,2000);
         assertEquals(dto.getLevel() , userDto.getLevel());
         assertEquals(dto.getUserName(),userDto.getUserName());
+    }
+
+    @Test
+    void findByUserIdTest(){
+        entityManager.persistAndFlush(users);
+        Users found = usersRepository.findByUserId("ID1").orElse(null);
+        assertNotNull(found);
     }
 }

@@ -1,9 +1,5 @@
 "use strict"
-
-
-
-
-$(document).ready(function() {
+$(document).ready(function () {
 
     //When page loads...
     $(".tab_content").hide(); //Hide all content
@@ -11,7 +7,7 @@ $(document).ready(function() {
     $(".tab_content:first").show(); //Show first tab content
 
     //On Click Event
-    $("ul.tabs li").click(function() {
+    $("ul.tabs li").click(function () {
 
         $("ul.tabs li").removeClass("is-active"); //Remove any "active" class
         $(this).addClass("is-active"); //Add "active" class to selected tab
@@ -24,9 +20,24 @@ $(document).ready(function() {
 
 });
 
-
-
-function searchUser(){
+function searchUsers() {
     var username = $('#id-txt-user').val();
-    alert(username + "님! 준비중입니다. 다음에 이용해주세요!");
+    $.ajax({
+        type: 'POST',
+        url: '/users',
+        contentType: "applicatiion/json",
+        data: username,
+        success: function (response) {
+            location.href = `/users/${response['data'].userId}`;
+        },
+        error: function (response) {
+            sendErrorAlert(response);
+        }
+    });
+}
+
+function sendErrorAlert(response) {
+    let code = "[" + response.responseJSON.code + "]\n";
+    let msg = response.responseJSON.message;
+    window.alert(code + msg);
 }
