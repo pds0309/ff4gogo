@@ -29,7 +29,6 @@ public class ApiExceptionHandler{
                 e.getMessage(), e.getCode(), HttpStatus.BAD_REQUEST, null, request.getRequestURI());
     }
 
-    //TODO 로직-컨트롤러 추가 후 테스트
     @ExceptionHandler(value = {MissingServletRequestParameterException.class})
     public ResponseEntity<Object> handleMissParamException(MissingServletRequestParameterException e, HttpServletRequest request) {
         basicLogs(request);
