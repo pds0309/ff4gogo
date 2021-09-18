@@ -19,7 +19,6 @@ class ResponseHandlerTest {
         ResponseEntity<String> responseEntity = ResponseHandler.generateResponse("msg", HttpStatus.OK,objString);
         assertEquals(200 , responseEntity.getStatusCodeValue());
         JSONObject result = new JSONObject(responseEntity);
-        System.out.println(result);
         assertEquals("hello" , result.getJSONObject("body").getString("data"));
         assertEquals("msg",result.getJSONObject("body").getString("message"));
     }
@@ -34,7 +33,6 @@ class ResponseHandlerTest {
                                 errorInfo.getErrorMsg(),errorInfo.getErrorCode(),HttpStatus.BAD_REQUEST,userDto,"/users");
         assertEquals(400 , responseEntity.getStatusCodeValue());
         JSONObject result = new JSONObject(responseEntity);
-        System.out.println(result);
         assertEquals(errorInfo.getErrorCode(),result.getJSONObject("body").getInt("code"));
         assertEquals(errorInfo.getErrorMsg(),result.getJSONObject("body").getString("message"));
         assertEquals("/users",result.getJSONObject("body").getString("path"));

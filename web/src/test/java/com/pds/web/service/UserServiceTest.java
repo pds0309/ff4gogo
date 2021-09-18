@@ -18,6 +18,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -94,5 +96,24 @@ class UserServiceTest {
         assertTrue(userSearchService.isValidNickName("ABCD"));
         assertFalse(userSearchService.isValidNickName("A"));
         assertFalse(userSearchService.isValidNickName(null));
+    }
+
+    @Test
+    void getMatchListFirstTimeTest(){
+        List<String> matchCodeList = new ArrayList<>();
+        matchCodeList.add("A");
+        matchCodeList.add("B");
+        given(userApi.getUserMatchesFromApi(userDto.getUserId(),30))
+                .willReturn(matchCodeList);
+        assertEquals(matchCodeList,userSearchService.getMatchListFirstTime(userDto.getUserId()));
+    }
+    @Test
+    void getMatchListNoMatchFirstTimeTest(){
+        List<String> matchCodeList = new ArrayList<>();
+        String userId = userDto.getUserId();
+        given(userApi.getUserMatchesFromApi(userId,30))
+                .willReturn(matchCodeList);
+        assertThrows(UserRequestException.class,()->
+                userSearchService.getMatchListFirstTime(userId));
     }
 }
