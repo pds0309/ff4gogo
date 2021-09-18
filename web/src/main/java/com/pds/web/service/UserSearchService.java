@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Log4j2
@@ -46,5 +48,13 @@ public class UserSearchService {
     }
     public boolean isValidNickName(String nickName){
         return nickName != null && nickName.length() >= 2;
+    }
+
+    public List<String> getMatchListFirstTime(String userId){
+        List<String> matchCodeList = userApi.getUserMatchesFromApi(userId,30);
+        if(matchCodeList.isEmpty()){
+            throw new UserRequestException("유저의 최근 개인순위경기 기록이 없습니다!",ErrorInfo.USER_DATA_NOT_EXIST.getErrorCode());
+        }
+        return matchCodeList;
     }
 }

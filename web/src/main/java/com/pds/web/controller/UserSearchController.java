@@ -14,10 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.WebRequest;
-
-import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -46,5 +43,11 @@ public class UserSearchController {
             model.addAttribute("errormsg","["+e.getCode()+"]\n"+e.getMessage());
             return "error";
         }
+    }
+    @PostMapping("/users/{id}/matches")
+    @ResponseBody
+    public ResponseEntity<List<String>> saveUserMatches(@PathVariable String id){
+        return ResponseHandler.generateResponse("유저 매치리스트 수집 성공",
+                HttpStatus.OK, userSearchService.getMatchListFirstTime(id));
     }
 }
