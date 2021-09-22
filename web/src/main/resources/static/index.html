@@ -12,7 +12,8 @@
     <script src="https://code.jquery.com/jquery-3.6.0.js"
             integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
             crossorigin="anonymous"></script>
-    <script src="js/ind.js"></script>
+    <script src="/js/search.js"></script>
+    <script src="/js/ind.js"></script>
 </head>
 <body>
 <section id="id-index-title" class="hero is-medium has-text-centered">
@@ -33,7 +34,7 @@
             <h1 class="title is-1 has-text-centered" th:text="|${thisseason} 시즌|">202109시즌</h1>
             <p class="title is-4 has-text-centered" th:text="|${matchnum} 경기 Top Players|">10563 경기 Top Player</p>
             <div class="tabs is-centered is-toggle is-toggle-rounded is-fullwidth is-justify-content-center">
-                <ul class="has-text-weight-bold column  tabs">
+                <ul class="has-text-weight-bold column  tabs outer">
                     <li class="is-active"><a href="#id-tab1">출장</a></li>
                     <li><a href="#id-tab2">승률</a></li>
                     <li><a href="#id-tab3">득점</a></li>
@@ -41,7 +42,7 @@
                 </ul>
             </div>
             <div>
-                <div id="id-tab1" class="container has-text-centered tab_content">
+                <div id="id-tab1" class="container has-text-centered tab_content outer">
                     <div class="tile is-ancestor">
                         <div class="tile is-child p-1" th:each="stat,index:${topcnt}">
                             <article class="tile is-child box is-relative">
@@ -58,12 +59,11 @@
                                 </figure>
                                 <p class="is-size-6 has-text-weight-bold" th:text="${stat.statId.getPlayer().getPlayerName()}">즐라탄 이브라히모비치</p>
                                 <p><span class="has-text-primary has-text-weight-bold" th:text="${stat.getCnt()}">7.75</span> 회 출장</p>
-                                <!--                                <a class="button">조회하기</a>-->
                             </article>
                         </div>
                     </div>
                 </div>
-                <div id="id-tab2" class="container has-text-centered tab_content">
+                <div id="id-tab2" class="container has-text-centered tab_content outer">
                     <div class="tile is-ancestor">
                         <div class="tile is-child p-1" th:each="stat,index:${topwin}">
                             <article class="tile is-child box is-relative">
@@ -85,7 +85,7 @@
                         </div>
                     </div>
                 </div>
-                <div id="id-tab3" class="container has-text-centered tab_content">
+                <div id="id-tab3" class="container has-text-centered tab_content outer">
                     <div class="tile is-ancestor">
                         <div class="tile is-child p-1" th:each="stat,index:${topgoal}">
                             <article class="tile is-child box is-relative">
@@ -107,7 +107,7 @@
                         </div>
                     </div>
                 </div>
-                <div id="id-tab4" class="container has-text-centered tab_content">
+                <div id="id-tab4" class="container has-text-centered tab_content outer">
                     <div class="tile is-ancestor">
                             <div class="tile is-child p-1" th:each="stat,index:${toprating}">
                             <article class="tile is-child box is-relative">
