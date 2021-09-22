@@ -5,9 +5,7 @@ import com.pds.web.api.MatchDto;
 import com.pds.web.exception.ErrorInfo;
 import com.pds.web.exception.UserRequestException;
 import com.pds.web.service.UserMatchService;
-import com.pds.web.service.UserSearchService;
 import com.pds.web.utils.ApiExceptionHandler;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,13 +37,6 @@ class UserMatchControllerTest {
 
     @MockBean
     private UserMatchService matchService;
-
-    /*
-        @GetMapping("/users/{id}/matches")
-    public ResponseEntity<MatchDto.Info> getDetailFromMatchCode(@PathVariable String id , @RequestParam String mc){
-            return ResponseHandler.generateResponse("상세 순위경기 조회 OK", HttpStatus.OK,userMatchService.getDetailMatchList(mc,id));
-    }
-     */
 
     private Class<? extends Exception> getApiResultExceptionClass(MvcResult result) {
         return Objects.requireNonNull(result.getResolvedException()).getClass();

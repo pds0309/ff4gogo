@@ -40,3 +40,10 @@ function sendErrorAlert(response) {
     let msg = response.responseJSON.message;
     window.alert(code + msg);
 }
+
+function getPlayerInfo(playerid){
+    return $.ajax({
+        type: 'GET',
+        url: `/players?pid=${playerid}`
+    });
+}
