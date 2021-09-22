@@ -179,7 +179,7 @@ function getMoreMatch(id) {
 
 function postGangsin(timestamp) {
     let now = new Date().getTime();
-    let time = (((now - timestamp) / (1000 * 60))) / 60;
+    let time = ((now - timestamp) / (1000 * 60));
     if (time <= 120) {
         $('#id-text-gangsintime').text(Math.round(time) + "분 전 갱신됨");
     } else {
@@ -202,12 +202,18 @@ function postDerBogi(len) {
 function getSummaryInfo(userid, dtos) {
     let goal = [0, 0];
     let wdl = [0, 0, 0];
+    let shoots1 = [0, 0];
+    let shoots2 = [0, 0];
+    let poss = 0;
+    let idx = 0;
     let myplayers = [];
-    for (let k = 0; k < dtos.length; k++) {
-        goal[0] += dtos[k].basicDtoList[0].goalTotal;
-        goal[1] += dtos[k].basicDtoList[1].goalTotal;
-
-        let result = dtos[k].basicDtoList[0].matchResult;
+    let mypassDto = [];
+    let yourpassDto = [];
+    let dribbles = [0,0];
+    for (let dto of dtos) {
+        goal[0] += dto.basicDtoList[0].goalTotal;
+        goal[1] += dto.basicDtoList[1].goalTotal;
+        let result = dto.basicDtoList[0].matchResult;
         if (result === "승") {
             wdl[0]++;
         } else if (result === "무") {
@@ -215,18 +221,95 @@ function getSummaryInfo(userid, dtos) {
         } else {
             wdl[2]++;
         }
-        let matchPlayers = dtos[k].matchPlayerDtoList[0];
+        let matchPlayers = dto.matchPlayerDtoList[0];
         for (let j = 0; j < matchPlayers.length; j++) {
             if (matchPlayers[j].spPosition !== 28) {
                 myplayers.push(matchPlayers[j]);
+                dribbles[0] += matchPlayers[j].dribbleTry;
+                dribbles[1] += matchPlayers[j].dribbleSuccess;
             }
+        }
+        let summary = dto.summaryDtoList;
+        if (dto.matchPlayerDtoList[0].length !== 0 && dto.matchPlayerDtoList[1].length !== 0) {
+            idx += 1;
+            poss += summary[0].possession;
+            shoots1[0] += summary[0].shootTotal;
+            shoots1[1] += summary[0].effectiveShootTotal;
+            shoots2[0] += summary[1].shootTotal;
+            shoots2[1] += summary[1].effectiveShootTotal;
+            mypassDto.push(dto.passDtoList[0]);
+            yourpassDto.push(dto.passDtoList[1]);
         }
     }
     getGoalBar(goal, dtos.length);
     getWdlDonut(wdl, dtos.length);
-    getMvps(myplayers, userid)
+    getMvps(myplayers, userid);
+    if (idx === 0) {
+        return;
+    }
+    let passKeys = Object.keys(mypassDto[0]);
+    let myPass = dtoReducer(passKeys, mypassDto);
+    let yourPass = dtoReducer(passKeys, yourpassDto);
+    getAnalSummary(poss, shoots1, shoots2, idx, goal,dribbles);
+    getAnalPass(myPass, idx, [0, 1, 2], "성공");
+    getAnalPass(yourPass, idx, [2, 1, 0], "허용");
 }
 
+function getAnalPass(passList, idx, arr, msg) {
+    let allPass = passList["passTry"];
+    //glass-martini-alt
+    if (msg === "성공") {
+        let totPassSuc = Math.round(passList["passSuccess"] / allPass * 100);
+        $(`#anal-${(totPassSuc >= 92) ? arr[2] : (totPassSuc <= 82) ? arr[0] : arr[1]}`)
+            .append(`<p class="is-size-3-desktop is-size-5-mobile"><i class="fa fa-shoe-prints"></i>&nbsp;[패스${msg}]</p>
+<p class="has-text-white">${idx}경기에서 ${empText(totPassSuc + "%")}의 패스 ${msg}률을 보였습니다.</p><br>`);
+    }
+    let notShort = allPass - passList["shortPassTry"];
+    let notShortSuccess = passList["passSuccess"] - passList["shortPassSuccess"];
+    if (notShort / allPass >= 0.15 && notShortSuccess / notShort >= 0.8) {
+        $(`#anal-${arr[2]}`)
+            .append(`<p class="is-size-3-desktop is-size-5-mobile"><i class="fa fa-ruler-horizontal"></i>&nbsp;[고급패스${msg}]</p>
+<p class="has-text-white">전체패스의 ${Math.round(notShort / allPass * 100)}%가 고급패스로 ${empText(Math.round(notShortSuccess / notShort * 100) + "%")}의 고급 패스를 ${msg}했습니다.</p><br>`);
+    }
+
+    let throughSuccess = Math.round(passList["throughPassSuccess"] / passList["throughPassTry"] * 100);
+    $(`#anal-${(throughSuccess >= 90) ? arr[2] : (throughSuccess < 60) ? arr[0] : arr[1]}`)
+        .append(`<p class="is-size-3-desktop is-size-5-mobile"><i class="fa fa-divide"></i>&nbsp;[스루패스${msg}]</p>
+<p class="has-text-white">${passList["throughPassTry"]}번의 스루패스 중 ${empText(throughSuccess+"%")}를 ${msg}했습니다.</p><br>`);
+
+}
+
+function getAnalSummary(poss, shoots1, shoots2, idx, goal, dribbles) {
+    let myPos = Math.round(poss / idx);
+    $(`#anal-${(myPos < 40) ? 0 : (myPos > 60) ? 2 : 1}`)
+        .append(`<p class="is-size-3-desktop is-size-5-mobile"><i class="fa fa-user-clock"></i>&nbsp;[점유율]</p>
+<p class="has-text-white">경기 평균 ${empText(myPos + '%')} 의 점유율을 보였습니다.</p><br>`);
+
+    let goalEff = parseInt(((goal[0] / shoots1[0]) * 100) / 33);
+    $(`#anal-${Math.min(goalEff, 2)}`)
+        .append(`<p class="is-size-3-desktop is-size-5-mobile"><i class="fa fa-futbol"></i>&nbsp;[득점효율]</p>
+<p class="has-text-white">${empText("[ " + shoots1[1] + " / " + shoots1[0] + " ]")}개의 슈팅 중 ${empText(goal[0])} 득점을 만들었습니다.</p><br>`);
+
+    let shootEff = parseInt(((shoots1[1] / shoots1[0]) * 100) / 33);
+    $(`#anal-${Math.min(shootEff, 2)}`)
+        .append(`<p class="is-size-3-desktop is-size-5-mobile"><i class="fa fa-exchange-alt"></i>&nbsp;[유효슈팅]</p>
+<p class="has-text-white">${Math.round((shoots1[1] / shoots1[0]) * 100)}%의 슈팅이 골대를 향했습니다.</p><br>`);
+
+    let yourShoot = (shoots2[1] / idx);
+    $(`#anal-${(yourShoot >= 4) ? 0 : (yourShoot <= 2) ? 2 : 1}`)
+        .append(`<p class="is-size-3-desktop is-size-5-mobile"><i class="fa fa-exclamation"></i>&nbsp;[슈팅허용]</p>
+<p class="has-text-white">경기 평균 ${empText(Math.round(yourShoot * 10) / 10)}개의 유효슈팅을 허용했습니다.</p><br>`);
+
+    let drbSucc = Math.round(dribbles[1]/dribbles[0]*100);
+    if(drbSucc >= 90){
+        $(`#anal-2`).append(`<p class="is-size-3-desktop is-size-5-mobile"><i class="fa fa-lightbulb"></i>&nbsp;[환상적인 발놀림]</p>
+<p class="has-text-white">${drbSucc}%의 성공률을 자랑하는 환상적인 드리블러입니다.</p><br>`);
+    }
+    else if(drbSucc < 35){
+        $(`#anal-0`).append(`<p class="is-size-3-desktop is-size-5-mobile"><i class="fa fa-lightbulb"></i>&nbsp;[쓸데없는 발재간]</p>
+<p class="has-text-white">${100-drbSucc}%의 드리블 실패로 흐름을 끊는 플레이를 합니다.</p><br>`);
+    }
+}
 
 function getMvps(players, userid) {
     return $.ajax({
@@ -418,4 +501,22 @@ function getHTMLMatches(basic, owngoals, k) {
                 </div><br><br>
             </div>`;
     $(`#id-container-matchlist`).append(htmls);
+}
+
+
+function getAnalGita() {
+    $('#anal-1').toggle();
+}
+
+function empText(val) {
+    return `<span class="has-text-weight-bold">${val}</span>`;
+}
+
+function dtoReducer(keys, obj) {
+    return obj.reduce(function (pre, cur) {
+        for (let i of keys) {
+            pre[i] += cur[i];
+        }
+        return pre;
+    });
 }
