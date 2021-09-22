@@ -28,4 +28,13 @@ public class PlayerDto {
             this.playerName = jsonObject.getString("name");
         }
     }
+    @Getter
+    public static class InfoWithImage{
+        private final Info info;
+        private final String pImg;
+        public InfoWithImage(Info info , String pImg){
+            this.info = info;
+            this.pImg = pImg;
+        }
+    }
 }
