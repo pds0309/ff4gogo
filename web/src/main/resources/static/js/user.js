@@ -26,7 +26,6 @@ $(document).ready(function () {
                     let matches = getMatch[k];
                     await getMatchDetailList(userid, matches)
                         .done(function (res2) {
-                            console.log(k);
                             if (res2 != null) {
                                 getViewMatches(res2.data, k);
                                 md[k] = res2.data;
@@ -37,14 +36,12 @@ $(document).ready(function () {
                 return [md, mc];
             }
             re().then(value => {
-                console.log("로칼에 저장");
                 let matches = {
                     detail: value[0],
                     codes: value[1],
                     timestamp: new Date().getTime(),
                     allcode: res1.data
                 }
-                console.log(matches);
                 deleteFromLocal();
                 localStorage.setItem(userid, JSON.stringify(matches));
                 postDerBogi(res1.data.length);
@@ -120,41 +117,6 @@ function clickDetail(k) {
 }
 
 
-function getHTMLMatches(basic, owngoals, k) {
-    let mybasic = basic[0];
-    let yourbasic = basic[1];
-    let endtype = ["", "몰수", "몰수"];
-    let resultColor = mybasic.matchResult === "승" ? "#add8e6" : (mybasic.matchResult === "무") ? "#d3d3d3" : "#fcadc8";
-
-    let htmls = `<div id="id-match-${k}" class="has-text-centered has-text-white clas">
-                <div class="card">
-                    <header class="card-header" style="background-color: ${resultColor}">&nbsp;&nbsp;&nbsp;
-                        <p class="card-header-title is-size-4-desktop is-size-6-mobile">
-                            ${endtype[mybasic.matchEndType]}${mybasic.matchResult}
-                        </p>
-                        <span class="card-header-icon has-text-right is-size-5-desktop is-size-7-mobile">${mybasic.matchDate}</span>
-                        <button id="id-match-btn-${k}" class="card-header-icon hovable" aria-label="more options">
-                            <span class="icon">
-                            <i class="fa fa-angle-down" aria-hidden="true"></i>
-                        </span>
-                        </button>
-                    </header>
-                    <div class="card-content">
-                        <div class="content has-text-weight-bold is-size-4-desktop is-size-7-mobile">
-                            <span>
-                                <i class="fa fa-${mybasic.controller}"></i>
-                            &nbsp;&nbsp;${mybasic.nickname}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${mybasic.goalTotal + owngoals[1]} : ${yourbasic.goalTotal + owngoals[0]}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${yourbasic.nickname}&nbsp;&nbsp;
-                                <i class="fa fa-${yourbasic.controller}"></i>
-                            </span>
-                        </div>
-                    </div>
-                    <div id="id-match-detail-${k}" class="card-content pl-3 pr-3" style="display: none"></div>
-                </div><br><br>
-            </div>`;
-    $(`#id-container-matchlist`).append(htmls);
-}
-
-
 function getMatchCodeList(userid) {
     return $.ajax({
         type: 'POST',
@@ -164,7 +126,7 @@ function getMatchCodeList(userid) {
             $(`#id-section-nodata`).show();
             $(`#id-all-match`).hide();
             $(`#id-all-match-list`).hide();
-            $(`#id-finderror`).append("["+response.responseJSON.code+"] "+response.responseJSON.message);
+            $(`#id-finderror`).append("[" + response.responseJSON.code + "] " + response.responseJSON.message);
         }
     });
 }
@@ -198,7 +160,6 @@ function deleteFromLocal() {
 
 
 function getMoreMatch(id) {
-    console.log(id);
     let index = $('.clas').length;
     let matchCodeList = JSON.parse(localStorage.getItem(id)).allcode;
     let newMatchList = matchCodeList.slice(index, index + 5);
@@ -216,54 +177,113 @@ function getMoreMatch(id) {
 }
 
 
-function postGangsin(timestamp){
+function postGangsin(timestamp) {
     let now = new Date().getTime();
-    let time = (((now-timestamp) / (1000 * 60 )));
-    if(time <= 120){
+    let time = (((now - timestamp) / (1000 * 60))) / 60;
+    if (time <= 120) {
         $('#id-text-gangsintime').text(Math.round(time) + "분 전 갱신됨");
-    }
-    else{
-        $('#id-text-gangsintime').text(Math.round(time%60) + "시간 전 갱신됨");
+    } else {
+        $('#id-text-gangsintime').text(Math.round(time / 60) + "시간 전 갱신됨");
         $('#id-btn-gangsin').removeAttr("disabled");
     }
 }
-function getGangsin(id){
+
+function getGangsin(id) {
     localStorage.removeItem(id);
     window.location.reload();
 }
-function postDerBogi(len){
+
+function postDerBogi(len) {
     if (len > 10) {
         $('#id-derbogi').show();
     }
 }
 
-function getSummaryInfo(userid, dtos){
-    console.log(dtos);
-    let goal = [0,0];
-    let wdl = [0,0,0];
+function getSummaryInfo(userid, dtos) {
+    let goal = [0, 0];
+    let wdl = [0, 0, 0];
     let myplayers = [];
-    for(let k = 0 ; k < dtos.length ; k ++){
+    for (let k = 0; k < dtos.length; k++) {
         goal[0] += dtos[k].basicDtoList[0].goalTotal;
         goal[1] += dtos[k].basicDtoList[1].goalTotal;
 
         let result = dtos[k].basicDtoList[0].matchResult;
-        if(result === "승"){
+        if (result === "승") {
             wdl[0]++;
-        }
-        else if(result === "무"){
+        } else if (result === "무") {
             wdl[1]++;
-        }
-        else{
+        } else {
             wdl[2]++;
         }
-        myplayers.push(dtos[k].matchPlayerDtoList[0]);
+        let matchPlayers = dtos[k].matchPlayerDtoList[0];
+        for (let j = 0; j < matchPlayers.length; j++) {
+            if (matchPlayers[j].spPosition !== 28) {
+                myplayers.push(matchPlayers[j]);
+            }
+        }
     }
-    console.log(myplayers);
-    getGoalBar(goal , dtos.length);
+    getGoalBar(goal, dtos.length);
     getWdlDonut(wdl, dtos.length);
+    getMvps(myplayers, userid)
 }
 
-function getWdlDonut(wdl , len){
+
+function getMvps(players, userid) {
+    return $.ajax({
+        type: 'POST',
+        url: `/users/${userid}/matches/mvp`,
+        contentType: 'application/json',
+        data: JSON.stringify(players),
+        success: function (response) {
+            let bestdto = response.data;
+            yourGoalGetter(bestdto);
+            yourAssister(bestdto);
+            yourStar(bestdto);
+        },
+        error: function (response) {
+            $('#mvps').hide();
+            $('#id-tab-mvps')
+                .append(`<p class="container has-text-white has-text-centered has-text-danger is-size-7">
+[${response.responseJSON.code}] ${response.responseJSON.message}<p>최근순위경기에 몰수경기만 있었나요?</p></p>`)
+        }
+    });
+}
+
+function yourGoalGetter(bestdto) {
+    const max = bestdto.reduce(function (prev, current) {
+        return (prev.goal > current.goal) ? prev : current
+    });
+    getPlayerInfo(max.spId)
+        .done(function (result) {
+            let player = result.data;
+            $('#mvp-goalgetter').append(`${getHTMLMvps(player.info.season.img, player.pimg, player.info.playerName)}<p><span class="has-text-primary has-text-weight-bold">${max.cnt}경기 ${max.goal} 득점</p>`);
+        });
+
+}
+
+function yourAssister(bestdto) {
+    const max = bestdto.reduce(function (prev, current) {
+        return (prev.assist > current.assist) ? prev : current
+    });
+    getPlayerInfo(max.spId)
+        .done(function (result) {
+            let player = result.data;
+            $('#mvp-assister').append(`${getHTMLMvps(player.info.season.img, player.pimg, player.info.playerName)}<p><span class="has-text-link has-text-weight-bold">${max.cnt}경기 ${max.assist} 도움</p>`);
+        });
+}
+
+function yourStar(bestdto) {
+    const max = bestdto.reduce(function (prev, current) {
+        return (prev.spRating > current.spRating) ? prev : current
+    });
+    getPlayerInfo(max.spId)
+        .done(function (result) {
+            let player = result.data;
+            $('#mvp-star').append(`${getHTMLMvps(player.info.season.img, player.pimg, player.info.playerName)}<p><span class="has-text-danger has-text-weight-bold">${max.cnt}경기 ${Math.round(max.spRating * 100) / 100} 평점</p>`);
+        });
+}
+
+function getWdlDonut(wdl, len) {
     let options = {
         series: wdl,
         chart: {
@@ -274,7 +294,7 @@ function getWdlDonut(wdl , len){
                 show: false
             }
         },
-        labels: ["승","무","패"],
+        labels: ["승", "무", "패"],
         title: {
             text: `${len}경기 ${wdl[0]}승 ${wdl[1]}무 ${wdl[2]}패`,
             align: 'center'
@@ -295,7 +315,7 @@ function getWdlDonut(wdl , len){
     chart.render();
 }
 
-function getGoalBar(goalList , len){
+function getGoalBar(goalList, len) {
     var options = {
         series: [{
             data: goalList
@@ -321,9 +341,9 @@ function getGoalBar(goalList , len){
                 fontSize: "1.5em"
             }
         },
-        colors: ['#468af6','#de5d5d'],
+        colors: ['#468af6', '#de5d5d'],
         xaxis: {
-            categories: ['득점','실점'],
+            categories: ['득점', '실점'],
         },
         yaxis: {
             labels: {
@@ -353,4 +373,49 @@ function getGoalBar(goalList , len){
     };
     var chart = new ApexCharts(document.querySelector("#basic-goal-chart"), options);
     chart.render();
+}
+
+function getHTMLMvps(simg, pimg, pname) {
+    return `<figure class="card-image is-128x128">
+                                        <div style="width: fit-content; display: inline-block">
+                                            <img class="is-rounded" src="${pimg}">
+                                            <img style="position: absolute;top: 79%" class="image"
+                                                 src="${simg}">
+                                        </div>
+                                    </figure>
+                                    <p class="is-size-6 has-text-weight-bold">${pname}</p>`;
+}
+
+function getHTMLMatches(basic, owngoals, k) {
+    let mybasic = basic[0];
+    let yourbasic = basic[1];
+    let endtype = ["", "몰수", "몰수"];
+    let resultColor = mybasic.matchResult === "승" ? "#add8e6" : (mybasic.matchResult === "무") ? "#d3d3d3" : "#fcadc8";
+    let controllers = (mybasic.controller === "etc") ? "question" : mybasic.controller;
+    let htmls = `<div id="id-match-${k}" class="has-text-centered has-text-white clas">
+                <div class="card">
+                    <header class="card-header" style="background-color: ${resultColor}">&nbsp;&nbsp;&nbsp;
+                        <p class="card-header-title is-size-4-desktop is-size-6-mobile">
+                            ${endtype[mybasic.matchEndType]}${mybasic.matchResult}
+                        </p>
+                        <span class="card-header-icon has-text-right is-size-5-desktop is-size-7-mobile">${mybasic.matchDate}</span>
+                        <button id="id-match-btn-${k}" class="card-header-icon hovable" aria-label="more options">
+                            <span class="icon">
+                            <i class="fa fa-angle-down" aria-hidden="true"></i>
+                        </span>
+                        </button>
+                    </header>
+                    <div class="card-content">
+                        <div class="content has-text-weight-bold is-size-4-desktop is-size-7-mobile">
+                            <span>
+                                <i class="fa fa-${controllers}"></i>
+                            &nbsp;&nbsp;${mybasic.nickname}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${mybasic.goalTotal + owngoals[1]} : ${yourbasic.goalTotal + owngoals[0]}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${yourbasic.nickname}&nbsp;&nbsp;
+                                <i class="fa fa-${controllers}"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div id="id-match-detail-${k}" class="card-content pl-3 pr-3" style="display: none"></div>
+                </div><br><br>
+            </div>`;
+    $(`#id-container-matchlist`).append(htmls);
 }

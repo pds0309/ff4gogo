@@ -3,9 +3,7 @@ package com.pds.web.api;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.pds.common.dto.PlayerDto;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
@@ -139,11 +137,30 @@ public class MatchDto {
             this.shootDtoList = shootDtoList;
         }
     }
+    @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    @Getter
-    public static class InfoWithPlayer{
-        private Info info;
-        private PlayerDto.Info player;
+    @Builder(builderMethodName = "BestBuilder")
+    public static class BestDto{
+        private int spId;
+        private int goal;
+        private double spRating;
+        private double assist;
+        private int cnt;
+        public void setAll(MatchPlayerDto matchPlayerDto){
+            this.spId = matchPlayerDto.spId;
+            this.goal += matchPlayerDto.goal;
+            this.spRating = (this.spRating*this.cnt+matchPlayerDto.spRating)/(this.cnt+1);
+            this.assist += matchPlayerDto.assist;
+            this.cnt += 1;
+        }
+        public static BestDtoBuilder builder(MatchPlayerDto matchPlayerDto){
+            return BestBuilder()
+                    .spId(matchPlayerDto.getSpId())
+                    .goal(matchPlayerDto.getGoal())
+                    .spRating(matchPlayerDto.getSpRating())
+                    .assist(matchPlayerDto.getAssist())
+                    .cnt(1);
+        }
     }
 }
