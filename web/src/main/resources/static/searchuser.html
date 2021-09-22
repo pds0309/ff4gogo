@@ -9,22 +9,207 @@
     <script src="https://kit.fontawesome.com/15181efa86.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="/css/bulma.css">
     <link rel="stylesheet" href="/css/main.css">
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.js"
             integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
             crossorigin="anonymous"></script>
+    <script src="/js/search.js"></script>
+    <script src="/js/user.js"></script>
+
 </head>
 <body>
-<div>
-    <p th:text="${user.getUserName()}">유저이름</p>
-    <p th:text="${user.getLevel()}">유저레벨</p>
-    <p th:text="${rank}">최고순경</p>
-</div>
+<section class="hero is-medium has-text-centered">
+    <br>
+    <div id="hello">
 
+    </div>
+    <div class="hero-head">
+        <div class="container">
+            <a href="/" class="title is-3 is-white">피온4 고고 <i class="fa fa-home"></i></a>
+        </div>
+    </div>
+    <br>
+    <div class="hero-head">
+        <div class="container">
+            <input id="id-txt-user" class="input is-rounded is-size-5-desktop is-size-7-mobile has-text-centered"
+                   placeholder="닉네임 입력"><br><br>
+            <button onclick="searchUsers()"
+                    class="button is-white is-size-5-desktop is-size-7-mobile is-inverted has-text-weight-bold">다른 유저 조회&nbsp;<i
+                    class="fad fa-search"></i>
+            </button>
+        </div>
+    </div>
+    <br>
+</section>
+<section class="hero is-small has-text-centered">
+    <br>
+    <div class="hero-body">
+        <div class="container has-text-white is-size-2-desktop is-size-4-mobile">
+            <div>
+                <p>
+                    <span class="has-text-weight-bold" th:text="${user.getUserName()}">유저이름이너무길어요</span>
+                    <span class="has-text-weight-light has-text-grey-lighter is-size-6">님의 검색 결과</span>
+                </p>
+                <hr>
+            </div>
+            <div class="card column is-three-fifths is-offset-2">
+                <div class="card-content">
+                    <figure style="width: fit-content; display: inline-block" class="card-image is-96x96">
+                        <img src="https://fo4.dn.nexoncdn.co.kr/live/externalAssets/common/players/p214100.png"
+                             alt="image">
+                    </figure>
+                    <div>
+                        <p class="subtitle is-black is-size-4-desktop is-size-6-mobile mb-0">루드 굴리트</p>
+                        <small class="is-size-7">루드 굴리트 선수의 가호가 함께합니다.</small>
+                    </div>
+                    <div class="content is-size-4-desktop is-size-6-mobile">
+                        <br>
+                        <small>감독레벨</small>
+                        <p class="has-text-primary has-text-weight-bold" th:text="|${user.getLevel()}|">259</p>
+                        <small>최고순경</small>
+                        <p class="has-text-primary-dark has-text-weight-bold" th:text="|${rank}|">월드클래스1</p>
+                        <button id="id-btn-gangsin" th:onclick="getGangsin([[${user.getUserId()}]])" disabled class="button is-white is-size-4-desktop is-size-6-mobile is-inverted has-text-weight-bold">
+                            갱신하기 &nbsp;
+                            <i class="fa fa-redo"></i>
+                        </button>
+                        <br>
+                        <small id="id-text-gangsintime" class="has-text-grey"></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section id="id-section-nodata" class="hero is-medium" style="display: none">
+    <div class="hero-body">
+        <div class="container has-text-white has-text-centered">
+            <h2 class="is-size-2 has-text-danger">최근 1 on 1 순위경기가 없습니다!</h2>
+        </div>
+    </div>
+</section>
+<section id="id-all-match" class="hero is-small">
+    <br><br>
+    <div class="hero-body">
+        <div class="container has-text-white has-text-centered">
+            <h1 class="title is-size-2-desktop is-size-4-mobile">1 on 1 순위경기 요약</h1>
+            <p class="is-size-5-desktop is-size-7-mobile">가장 최근 10경기 이내 기준입니다.</p>
+            <div class="tabs is-green is-centered is-toggle is-toggle-rounded is-fullwidth is-justify-content-center">
+                <ul class="has-text-weight-bold column tabs outer">
+                    <li class="is-active"><a href="#id-tab-basic">기본</a></li>
+                    <li><a href="#id-tab-mvps">MVPS</a></li>
+                    <li><a href="#id-tab-anal">분석</a></li>
+                </ul>
+            </div>
+            <div>
+                <div id="id-tab-basic" class="container tab_content columns outer">
+                    <div id="basic-goal-chart" class="column">
+
+                    </div>
+                    <div id="basic-win-chart" class="column">
+
+                    </div>
+                </div>
+                <div id="id-tab-mvps" class="container tab_content outer">
+                    hello2
+                </div>
+                <div id="id-tab-anal" class="container tab_content outer">
+                    hello3
+                </div>
+            </div>
+            <div class="has-text-centered has-text-white">
+                <br><br>
+                <br><br>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="id-all-match-list" class="hero is-small">
+    <br><br>
+    <div class="hero-body">
+        <!-- all container -->
+        <div id="id-container-matchlist" class="container has-text-white has-text-centered">
+            <h1 class="title is-size-2-desktop is-size-4-mobile">1 on 1 최근 전적</h1><br>
+
+
+<!--            <div class="has-text-centered has-text-white">-->
+<!--                <div class="card">-->
+<!--                    <header class="card-header" style="background-color: #fcadc8">&nbsp;&nbsp;&nbsp;-->
+<!--                        <p class="card-header-title is-size-4-desktop is-size-6-mobile">-->
+<!--                            패-->
+<!--                        </p>-->
+<!--                        <span class="card-header-icon has-text-right is-size-5-desktop is-size-7-mobile">2021-09-18T21:04:21</span>-->
+<!--                        <button class="card-header-icon hovable" aria-label="more options">-->
+
+<!--                            <span class="icon">-->
+<!--                            <i class="fa fa-angle-down" aria-hidden="true"></i>-->
+<!--                        </span>-->
+
+<!--                        </button>-->
+
+<!--                    </header>-->
+<!--                    <div class="card-content">-->
+<!--                        <div class="content has-text-weight-bold is-size-4-desktop is-size-7-mobile">-->
+<!--                            <span>-->
+<!--                                <i class="fa fa-keyboard"></i>-->
+<!--                            &nbsp;&nbsp;킹루니&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 : 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;닉네임이너무긴데요&nbsp;&nbsp;-->
+<!--                                <i class="fa fa-gamepad"></i>-->
+<!--                            </span>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                    <div class="card-content pl-3 pr-3" style="display: none">-->
+<!--                        <div class="columns is-mobile has-background-info-light">-->
+<!--                            <div class="column">-->
+<!--                                <small><i class="fa fa-futbol"></i>&nbsp;45' 이브라히모비치</small><br>-->
+<!--                                <small>66' </small>-->
+<!--                            </div>-->
+<!--                            <div class="column">-->
+<!--                                <small>96' 이브라히모비치</small><br>-->
+<!--                                <small>hello</small>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                        <div class="tabs is-centered is-toggle is-fullwidth is-justify-content-center">-->
+<!--                            <ul class="has-text-weight-bold column tabs p-0">-->
+<!--                                <li class="is-active"><a href="#squad-999">Squad</a></li>-->
+<!--                                <li><a href="#match-999">경기</a></li>-->
+<!--                                <li><a href="#player-999">선수</a></li>-->
+<!--                                <li><a href="#shoot-999">슛</a></li>-->
+<!--                            </ul>-->
+<!--                        </div>-->
+<!--                        <div>-->
+<!--                            <div id="squad-999" class="container tab_content">-->
+<!--                                스쿼드예용-->
+<!--                            </div>-->
+<!--                            <div id="match-999" class="container tab_content">-->
+<!--                                경기예용-->
+<!--                            </div>-->
+<!--                            <div id="player-999" class="container tab_content">-->
+<!--                                선수예용-->
+<!--                            </div>-->
+<!--                            <div id="shoot-999" class="container tab_content">-->
+<!--                                슛이예여ㅛㅇ-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <br><br>-->
+<!--            </div>-->
+
+        </div>
+        <div id="id-derbogi" class="container has-text-white has-text-centered" style="display: none">
+            <button th:onclick="getMoreMatch([[${user.getUserId()}]])" class="button is-black is-fullwidth is-size-4-desktop is-size-6-mobile is-inverted has-text-weight-bold">
+                더보기&nbsp;
+                <i class="fa fa-plus"></i>
+            </button>
+        </div>
+    </div>
+</section>
+<div id="id-finderror" class="container has-text-white has-text-centered has-text-danger is-size-7"></div>
+<p id="userid" style="visibility: hidden" th:text="${user.getUserId()}"></p>
 <footer class="footer">
     <div class="content has-text-centered">
         <p>
             <strong><a href="https://jgthms.com">FifaOnline4 Open-Api</a></strong> based. <br>
-            <small>Title image by<a href="https://unsplash.com/">Unsplash</a>.</small><br>
             &copy;2021 pds0309 <a href="mailto:ehd0309@naver.com"><i class="fa fa-envelope-square"></i></a>
         </p>
     </div>
