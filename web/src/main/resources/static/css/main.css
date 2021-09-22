@@ -19,6 +19,7 @@
 .subtitle.is-black {
     color: black;
     font-size: 1.2rem;
+    text-shadow: 1px 1px 1px #000, 1px 1px 1px rgb(0, 0, 3);
 }
 
 .hero {
@@ -51,4 +52,18 @@
 .king-icon.k-2{
     color: brown;
     font-size: 0.9rem
+}
+
+
+.fa-redo:hover {
+    -webkit-transform: rotate(90deg); /* Chrome, Safari, Opera */
+    transform: rotate(90deg);
+    -webkit-transition: all 0.5s ease;
+}
+
+.tabs.is-green.is-toggle li.is-active a{
+    background-color: #0ae204;
+}
+.card-header-icon.hovable:hover{
+    background-color: #fff7f7;
 }
