@@ -64,4 +64,13 @@ class MatchDelieverTest {
         assertEquals(shootJSON.getDouble("assistY"),shootDto.getAssistY());
     }
 
+    @Test
+    void calGoalTimeTest(){
+        int time = 16779446;
+        assertEquals(82 , MatchDeliver.calGoalTime(time));
+
+        int time2 = 245;
+        assertEquals(4 , MatchDeliver.calGoalTime(time2));
+    }
+
 }
