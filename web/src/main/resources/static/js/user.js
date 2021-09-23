@@ -18,34 +18,42 @@ $(document).ready(function () {
         .done(function (res1) {
             let matchList = res1["data"];
             let getMatch = matchList.slice(0, 10);
+            let md = [];
+            let mc = [];
 
-            let re = async () => {
-                let md = [];
-                let mc = [];
-                for (let k = 0; k < getMatch.length; k++) {
-                    let matches = getMatch[k];
-                    await getMatchDetailList(userid, matches)
-                        .done(function (res2) {
-                            if (res2 != null) {
-                                getViewMatches(res2.data, k);
-                                md[k] = res2.data;
-                                mc[k] = matches;
-                            }
-                        })
-                }
-                return [md, mc];
+            function asyncMatches(param, k) {
+                return new Promise((resolve, reject) => {
+                    setTimeout(() => {
+                        getMatchDetailList(userid, param)
+                            .done(function (result) {
+                                if (result != null) {
+                                    resolve(md[k] = result.data);
+                                    resolve(mc[k] = matchList[k]);
+                                }
+                            });
+                    }, 3);
+                });
             }
-            re().then(value => {
+
+            async function parallel(array) {
+                const promises = array.map((param, t) => asyncMatches(param, t));
+                return await Promise.all(promises);
+            }
+
+            parallel(getMatch).then(value => {
+                for (let k = 0; k < value.length; k++) {
+                    getViewMatches(value[k], k);
+                }
                 let matches = {
-                    detail: value[0],
-                    codes: value[1],
+                    detail: value,
+                    codes: mc,
                     timestamp: new Date().getTime(),
-                    allcode: res1.data
+                    allcode: matchList
                 }
                 deleteFromLocal();
                 localStorage.setItem(userid, JSON.stringify(matches));
-                postDerBogi(res1.data.length);
-                getSummaryInfo(userid, value[0]);
+                postDerBogi(matchList.length);
+                getSummaryInfo(userid, value);
             });
         })
 });
@@ -56,21 +64,21 @@ function getViewMatches(dto, k) {
     getHTMLMatches(basic, owngoals, k);
 
     $(`#id-match-btn-${k}`).click(function () {
-        clickDetail(k);
+        clickDetail(k, dto);
     });
 }
 
-function clickDetail(k) {
+function clickDetail(k, dto) {
     let detailDiv = document.getElementById(`id-match-detail-${k}`);
     if (detailDiv.style.display === "none") {
         detailDiv.style.display = "block";
         if ($(`#id-match-detail-${k}`).text().length === 0) {
             $(`#id-match-detail-${k}`).append(`<div class="columns is-mobile has-background-info-light">
-                            <div class="column">
+                            <div id="match-goals-${k}-0" class="column">
                                 <small><i class="fa fa-futbol"></i>&nbsp;45' 이브라히모비치</small><br>
                                 <small>66' </small>
                             </div>
-                            <div class="column">
+                            <div id="match-goals-${k}-1"  class="column">
                                 <small>96' 이브라히모비치</small><br>
                                 <small>hello</small>
                             </div>
@@ -110,12 +118,19 @@ function clickDetail(k) {
             $(activeTab).fadeIn(); //Fade in the active ID content
             return false;
         });
+        getOneMatchInfo(dto, k);
 
     } else {
         detailDiv.style.display = "none";
     }
 }
 
+function getOneMatchInfo(dto, k) {
+}
+
+function putGoals(shootDto, k) {
+
+}
 
 function getMatchCodeList(userid) {
     return $.ajax({
@@ -163,14 +178,28 @@ function getMoreMatch(id) {
     let index = $('.clas').length;
     let matchCodeList = JSON.parse(localStorage.getItem(id)).allcode;
     let newMatchList = matchCodeList.slice(index, index + 5);
-    for (let k = 0; k < newMatchList.length; k++) {
-        getMatchDetailList(id, newMatchList[k])
-            .done(function (result) {
-                if (result != null) {
-                    getViewMatches(result.data, index + k);
-                }
-            });
+
+    function asyncMoreMatches(param, k) {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                getMatchDetailList(id, newMatchList[k])
+                    .done(function (result) {
+                        if (result != null) {
+                            resolve(result.data);
+                        }
+                    });
+            }, 3);
+        });
     }
+    async function paral(matches) {
+        const result = matches.map((param, k) => asyncMoreMatches(param, k));
+        return await Promise.all(result);
+    }
+    paral(newMatchList).then(value => {
+        for (let k = 0; k < value.length; k++) {
+            getViewMatches(value[k], index + k);
+        }
+    });
     if (matchCodeList.length <= index + 5) {
         $('#id-derbogi').hide();
     }
@@ -209,7 +238,7 @@ function getSummaryInfo(userid, dtos) {
     let myplayers = [];
     let mypassDto = [];
     let yourpassDto = [];
-    let dribbles = [0,0];
+    let dribbles = [0, 0];
     for (let dto of dtos) {
         goal[0] += dto.basicDtoList[0].goalTotal;
         goal[1] += dto.basicDtoList[1].goalTotal;
@@ -250,7 +279,7 @@ function getSummaryInfo(userid, dtos) {
     let passKeys = Object.keys(mypassDto[0]);
     let myPass = dtoReducer(passKeys, mypassDto);
     let yourPass = dtoReducer(passKeys, yourpassDto);
-    getAnalSummary(poss, shoots1, shoots2, idx, goal,dribbles);
+    getAnalSummary(poss, shoots1, shoots2, idx, goal, dribbles);
     getAnalPass(myPass, idx, [0, 1, 2], "성공");
     getAnalPass(yourPass, idx, [2, 1, 0], "허용");
 }
@@ -275,7 +304,7 @@ function getAnalPass(passList, idx, arr, msg) {
     let throughSuccess = Math.round(passList["throughPassSuccess"] / passList["throughPassTry"] * 100);
     $(`#anal-${(throughSuccess >= 90) ? arr[2] : (throughSuccess < 60) ? arr[0] : arr[1]}`)
         .append(`<p class="is-size-3-desktop is-size-5-mobile"><i class="fa fa-divide"></i>&nbsp;[스루패스${msg}]</p>
-<p class="has-text-white">${passList["throughPassTry"]}번의 스루패스 중 ${empText(throughSuccess+"%")}를 ${msg}했습니다.</p><br>`);
+<p class="has-text-white">${passList["throughPassTry"]}번의 스루패스 중 ${empText(throughSuccess + "%")}를 ${msg}했습니다.</p><br>`);
 
 }
 
@@ -300,14 +329,13 @@ function getAnalSummary(poss, shoots1, shoots2, idx, goal, dribbles) {
         .append(`<p class="is-size-3-desktop is-size-5-mobile"><i class="fa fa-exclamation"></i>&nbsp;[슈팅허용]</p>
 <p class="has-text-white">경기 평균 ${empText(Math.round(yourShoot * 10) / 10)}개의 유효슈팅을 허용했습니다.</p><br>`);
 
-    let drbSucc = Math.round(dribbles[1]/dribbles[0]*100);
-    if(drbSucc >= 90){
+    let drbSucc = Math.round(dribbles[1] / dribbles[0] * 100);
+    if (drbSucc >= 90) {
         $(`#anal-2`).append(`<p class="is-size-3-desktop is-size-5-mobile"><i class="fa fa-lightbulb"></i>&nbsp;[환상적인 발놀림]</p>
 <p class="has-text-white">${drbSucc}%의 성공률을 자랑하는 환상적인 드리블러입니다.</p><br>`);
-    }
-    else if(drbSucc < 35){
+    } else if (drbSucc < 35) {
         $(`#anal-0`).append(`<p class="is-size-3-desktop is-size-5-mobile"><i class="fa fa-lightbulb"></i>&nbsp;[쓸데없는 발재간]</p>
-<p class="has-text-white">${100-drbSucc}%의 드리블 실패로 흐름을 끊는 플레이를 합니다.</p><br>`);
+<p class="has-text-white">${100 - drbSucc}%의 드리블 실패로 흐름을 끊는 플레이를 합니다.</p><br>`);
     }
 }
 
