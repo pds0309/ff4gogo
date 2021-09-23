@@ -31,11 +31,22 @@ public final class MatchDeliver {
             List<MatchDto.ShootDto> shootList = new ArrayList<>();
             for (int j = 0; j < shootDetail.length(); j++) {
                 JSONObject shootOBJ = shootDetail.getJSONObject(j);
-                shootList.add((MatchDto.ShootDto)getDto(shootOBJ.toString(), MatchDto.ShootDto.class));
+                MatchDto.ShootDto shootDto = (MatchDto.ShootDto)getDto(shootOBJ.toString(), MatchDto.ShootDto.class);
+                shootDto.setGoalTime(calGoalTime(shootDto.getGoalTime()));
+                shootList.add(shootDto);
             }
             shootDtoList.add(shootList);
         }
         return shootDtoList;
+    }
+    static int calGoalTime(int time){
+        int realTime = 0;
+        if (time >= 16777220) {
+            realTime = (time - 16777220) / 60 + 45;
+        } else {
+            realTime = time / 60;
+        }
+        return realTime;
     }
 
     public static List<MatchDto.PassDto> passInfo(List<JSONObject> oneMatchList){

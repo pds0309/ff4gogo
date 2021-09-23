@@ -8,9 +8,10 @@ import lombok.*;
 import java.util.List;
 
 public class MatchDto {
-    private MatchDto(){
+    private MatchDto() {
         //not use
     }
+
     @AllArgsConstructor
     @NoArgsConstructor
     @Getter
@@ -47,7 +48,7 @@ public class MatchDto {
     @NoArgsConstructor
     @Getter
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class PassDto{
+    public static class PassDto {
         private int passTry;
         private int passSuccess;
         private int shortPassTry;
@@ -99,7 +100,7 @@ public class MatchDto {
     @AllArgsConstructor
     @NoArgsConstructor
     @Getter
-    @JsonIgnoreProperties(ignoreUnknown = true,value = {"spIdType","spLevel"})
+    @JsonIgnoreProperties(ignoreUnknown = true, value = {"spIdType", "spLevel"})
     public static class ShootDto {
         private int goalTime;
         private double x;
@@ -116,6 +117,10 @@ public class MatchDto {
         private boolean inPenalty; //페널티박스 안에서 넣은 슛 여부 (안 : true, 밖 : false)
         public void setX(double x) {
             this.x = x;
+        }
+
+        public void setGoalTime(int goalTime) {
+            this.goalTime = goalTime;
         }
     }
 
@@ -137,24 +142,27 @@ public class MatchDto {
             this.shootDtoList = shootDtoList;
         }
     }
+
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder(builderMethodName = "BestBuilder")
-    public static class BestDto{
+    public static class BestDto {
         private int spId;
         private int goal;
         private double spRating;
         private double assist;
         private int cnt;
-        public void setAll(MatchPlayerDto matchPlayerDto){
+
+        public void setAll(MatchPlayerDto matchPlayerDto) {
             this.spId = matchPlayerDto.spId;
             this.goal += matchPlayerDto.goal;
-            this.spRating = (this.spRating*this.cnt+matchPlayerDto.spRating)/(this.cnt+1);
+            this.spRating = (this.spRating * this.cnt + matchPlayerDto.spRating) / (this.cnt + 1);
             this.assist += matchPlayerDto.assist;
             this.cnt += 1;
         }
-        public static BestDtoBuilder builder(MatchPlayerDto matchPlayerDto){
+
+        public static BestDtoBuilder builder(MatchPlayerDto matchPlayerDto) {
             return BestBuilder()
                     .spId(matchPlayerDto.getSpId())
                     .goal(matchPlayerDto.getGoal())
