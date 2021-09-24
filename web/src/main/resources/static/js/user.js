@@ -66,15 +66,17 @@ function getViewMatches(dto, k) {
     }
 
     $(`#id-match-btn-${k}`).click(function () {
-        if(dto["matchPlayerDtoList"][0].length===0 || dto["matchPlayerDtoList"][1].length===0){
+        if (dto["matchPlayerDtoList"][0].length === 0 || dto["matchPlayerDtoList"][1].length === 0) {
             $(`#id-match-detail-${k}`).append(`<p class="has-text-danger is-size-5-desktop is-size-7-mobile">조기 몰수 처리로 해당 경기의 데이터가 불온전하여 조회하실 수 없습니다.</p>`);
-            $(`#id-match-btn-${k}`).attr('disabled',true);
+            $(`#id-match-btn-${k}`).attr('disabled', true);
         }
         clickDetail(k, dto);
     });
 }
 
 function clickDetail(k, dto) {
+    let yourname = $(`#uname-${k}-1`).text();
+    let myname = $(`#uname-${k}-0`).text();
     let detailDiv = document.getElementById(`id-match-detail-${k}`);
     if (detailDiv.style.display === "none") {
         detailDiv.style.display = "block";
@@ -96,19 +98,28 @@ function clickDetail(k, dto) {
                         <div>
                             <div id="squad-${k}" class="container tab_content inner ${k}">
 <div class="field has-text-centered">
-  <span class="has-text-weight-bold"> 도전자&nbsp;</span>
+  <span class="has-text-weight-bold">${yourname}&nbsp;</span>
   <input id="switch-squad-${k}" type="checkbox" name="switch-squad-${k}" class="switch is-success" checked="checked">
-  <label class="has-text-weight-bold" for="switch-squad-${k}">&nbsp;</label><span class="has-text-weight-bold">당신</span>
+  <label class="has-text-weight-bold" for="switch-squad-${k}">&nbsp;</label><span class="has-text-weight-bold">&nbsp;${myname}</span>
 </div>
     <div id="squad-all-${k}-true">${squadHtml(k, 0)}</div>
     <div id="squad-all-${k}-false" style="display: none">${squadHtml(k, 1)}</div>
 </div>
                             </div>
                             <div id="match-${k}" class="container tab_content inner ${k}">
-                                경기예용
                             </div>
                             <div id="player-${k}" class="container tab_content inner ${k}">
-                                선수예용
+<div class="field has-text-centered">
+    <span class="has-text-weight-bold">${yourname}&nbsp;</span>
+    <input id="switch-player-${k}" type="checkbox" name="switch-player-${k}" class="switch is-danger" checked="checked">
+    <label class="has-text-weight-bold" for="switch-player-${k}">&nbsp;</label><span class="has-text-weight-bold">&nbsp;${myname}</span>
+</div>
+<div id="player-all-${k}-true" style="width: 100%;overflow: auto;">
+    ${playerTableHTML(k, 0)}
+</div>
+<div id="player-all-${k}-false" style="width: 100%;overflow: auto; display: none">
+    ${playerTableHTML(k, 1)}
+</div>
                             </div>
                             <div id="shoot-${k}" class="container tab_content inner ${k}">
                                 슛이예여ㅛㅇ
@@ -120,6 +131,13 @@ function clickDetail(k, dto) {
                 $(`#squad-all-${k}-${!status}`).css('display', 'none');
                 $(`#squad-all-${k}-${status}`).css('display', 'block');
             });
+            $(`#switch-player-${k}`).click(function () {
+                let status = $(`#switch-player-${k}`).is(':checked');
+                $(`#player-all-${k}-${!status}`).css('display', 'none');
+                $(`#player-all-${k}-${status}`).css('display', 'block');
+            });
+            addPlayerTableData(k, 0, sortDto(dto.matchPlayerDtoList[0], "spPosition"));
+            addPlayerTableData(k, 1, sortDto(dto.matchPlayerDtoList[1], "spPosition"));
             getOneMatchInfo(dto, k);
             let pIdSet = new Set();
             dto.matchPlayerDtoList.map(value => value.forEach(function (item) {
@@ -334,7 +352,7 @@ function getSummaryInfo(userid, dtos) {
         } else {
             wdl[2]++;
         }
-        if(dto.matchPlayerDtoList[0].length===0 || dto.matchPlayerDtoList[1].length===0){
+        if (dto.matchPlayerDtoList[0].length === 0 || dto.matchPlayerDtoList[1].length === 0) {
             continue;
         }
         idx += 1;
@@ -347,15 +365,15 @@ function getSummaryInfo(userid, dtos) {
             }
         }
         let summary = dto.summaryDtoList;
-            poss += summary[0].possession;
-            shoots1[0] += summary[0].shootTotal;
-            shoots1[1] += summary[0].effectiveShootTotal;
-            shoots2[0] += summary[1].shootTotal;
-            shoots2[1] += summary[1].effectiveShootTotal;
-            mypassDto.push(dto.passDtoList[0]);
-            yourpassDto.push(dto.passDtoList[1]);
-            goal[0] += dto.basicDtoList[0].goalTotal;
-            goal[1] += dto.basicDtoList[1].goalTotal;
+        poss += summary[0].possession;
+        shoots1[0] += summary[0].shootTotal;
+        shoots1[1] += summary[0].effectiveShootTotal;
+        shoots2[0] += summary[1].shootTotal;
+        shoots2[1] += summary[1].effectiveShootTotal;
+        mypassDto.push(dto.passDtoList[0]);
+        yourpassDto.push(dto.passDtoList[1]);
+        goal[0] += dto.basicDtoList[0].goalTotal;
+        goal[1] += dto.basicDtoList[1].goalTotal;
     }
     getGoalBar(goal, dtos.length);
     getWdlDonut(wdl, dtos.length);
@@ -607,7 +625,7 @@ function getHTMLMatches(basic, owngoals, k) {
                         <div class="content has-text-weight-bold is-size-4-desktop is-size-7-mobile">
                             <span>
                                 <i class="fa fa-${controllers}"></i>
-                            &nbsp;&nbsp;<span id="uname-${k}-0">${mybasic.nickname}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${mybasic.goalTotal + owngoals[1]} : ${yourbasic.goalTotal + owngoals[0]}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${yourbasic.nickname}&nbsp;&nbsp;
+                            &nbsp;&nbsp;<span id="uname-${k}-0">${mybasic.nickname}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${mybasic.goalTotal + owngoals[1]} : ${yourbasic.goalTotal + owngoals[0]}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="uname-${k}-1">${yourbasic.nickname}</span>&nbsp;&nbsp;
                                 <i class="fa fa-${controllers}"></i>
                             </span>
                         </div>
@@ -706,4 +724,69 @@ function squadHtml(k, idx) {
 <div id="sqd-${k}-${idx}-28" class="columns is-mobile">
 </div>
 <p id="mobilehovertext-name" class="has-text-weight-bold">&nbsp;</p>`
+}
+
+
+function playerTableHTML(k, idx) {
+    return `<table class="table is-size-6-desktop is-size-7-mobile" style="margin: 0 auto">
+  <thead>
+    <tr>
+      <th class="mytable-no-scroll"><abbr title="선수">PLAYER</abbr></th>
+      <th><abbr title="포지션">POS</abbr></th>
+      <th><abbr title="평점">STAR</abbr><i class="fa fa-angle-down" onclick="tbSorter(${k},${idx},2,this)"></i></th>
+      <th><abbr title="슈팅">SHOT</abbr><i class="fa fa-angle-down" onclick="tbSorter(${k},${idx},3,this)"></i></th>
+      <th><abbr title="유효슈팅">E_SHOT</abbr><i class="fa fa-angle-down" onclick="tbSorter(${k},${idx},4,this)"></i></th>
+      <th><abbr title="득점">GOL</abbr><i class="fa fa-angle-down" onclick="tbSorter(${k},${idx},5,this)"></i></th>
+      <th><abbr title="어시스트">ASI</abbr><i class="fa fa-angle-down" onclick="tbSorter(${k},${idx},6,this)"></i></th>
+      <th><abbr title="패스시도">PAS</abbr><i class="fa fa-angle-down" onclick="tbSorter(${k},${idx},7,this)"></i></th>
+      <th><abbr title="패스성공">S_PAS</abbr><i class="fa fa-angle-down" onclick="tbSorter(${k},${idx},8,this)"></i></th>
+      <th><abbr title="드리블시도">DRIB</abbr><i class="fa fa-angle-down" onclick="tbSorter(${k},${idx},9,this)"></i></th>
+      <th><abbr title="드리블성공">S_DRIB</abbr><i class="fa fa-angle-down" onclick="tbSorter(${k},${idx},10,this)"></i></th>
+      <th><abbr title="가로채기">INCT</abbr></th>
+      <th><abbr title="선방">BLOK</abbr></th>
+      <th><abbr title="태클시도">TAKLE</abbr></th>
+      <th><abbr title="태클성공">S_TAKLE</abbr></th>
+      <th><abbr title="경고">YCARD</abbr></th>
+      <th><abbr title="퇴장">RCARD</abbr></th>
+    </tr>
+  </thead>
+  <tbody id="tbod-${k}-${idx}">
+  </tbody>
+</table>`;
+}
+
+function addPlayerTableData(k, idx, playerDto) {
+    let tableArr = ['spRating', 'shoot', 'effectiveShoot', 'goal', 'assist', 'passTry', 'passSuccess',
+        'dribbleTry', 'dribbleSuccess', 'intercept', 'block', 'tackleTry', 'tackle', 'yellowCards', 'redCards'];
+    let player = playerDto.slice(0,11);
+    for (let p of player) {
+        let start = `<tr><td class="get-${p.spId}-name mytable-no-scroll has-text-left has-text-weight-bold" style="white-space: nowrap"></td><td class="pos-color-${p.rootPosName}"><small>${p.posName}</small></td>`;
+        tableArr.map(value => {
+            start += '<td>' + p[value] + '</td>';
+        });
+        $(`#tbod-${k}-${idx}`).append(`${start}</tr>`);
+    }
+}
+function tbSorter(k , idx , index,t){
+    let clas = $(t).attr('class');
+    let sortType = (clas.indexOf('down') === -1) ? 'up' : 'down';
+    var checkSort = true;
+    var target = $(`#tbod-${k}-${idx}`).find('tr');
+    while (checkSort) {
+        checkSort = false;
+        target.each(function(i, row) {
+            if (row.nextSibling == null) return;
+            var fCell = parseFloat(row.cells[index].innerHTML);
+            var sCell = parseFloat(row.nextSibling.cells[index].innerHTML);
+            if (sortType == 'up' && fCell > sCell) {
+                $(row.nextSibling).insertBefore($(row));
+                checkSort = true;
+            }
+            if (sortType == 'down' && fCell < sCell) {
+                $(row.nextSibling).insertBefore($(row));
+                checkSort = true;
+            }
+        });
+    }
+    $(t).attr('class',clas.replace(sortType , (sortType==='up') ? 'down' : 'up'));
 }
