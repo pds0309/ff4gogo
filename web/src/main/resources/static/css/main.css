@@ -133,7 +133,6 @@
     display: none;
 }
 
-
 @media screen and (max-width: 768px) {
     .myp > small {
         -webkit-text-size-adjust: none;
@@ -173,6 +172,13 @@
     }
     .myp.sub{
         margin-top: -15px;
+    }
+
+    .mytable-no-scroll{
+        position: sticky;
+        z-index: 99;
+        left: 0;
+        background-color: white;
     }
 }
 
