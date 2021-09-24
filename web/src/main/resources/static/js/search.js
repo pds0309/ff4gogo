@@ -20,7 +20,8 @@ $(document).ready(function () {
 });
 
 function searchUsers() {
-    var username = $('#id-txt-user').val();
+    var name = $('#id-txt-user').val();
+    var username = name.replace(/[^a-zA-z0-9ㄱ-힣]/g,'');
     $.ajax({
         type: 'POST',
         url: '/users',
@@ -47,3 +48,12 @@ function getPlayerInfo(playerid){
         url: `/players?pid=${playerid}`
     });
 }
+
+var setCookie = function (name, value , path) {
+    document.cookie = name + '=' + value + ';path='+path;
+};
+var getCookie = function (name) {
+    var value = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+    return value ? value[2] : null;
+};
+

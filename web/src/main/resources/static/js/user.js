@@ -1,5 +1,4 @@
 "use strict"
-
 $(document).ready(function () {
 
     const userid = $('#userid').text();
@@ -62,8 +61,15 @@ function getViewMatches(dto, k) {
     let basic = dto["basicDtoList"];
     let owngoals = [dto["summaryDtoList"][0].ownGoal, dto["summaryDtoList"][1].ownGoal];
     getHTMLMatches(basic, owngoals, k);
+    if (k === 0 && document.cookie.match("playerId") === null) {
+        addPlayerCooc(dto.matchPlayerDtoList[0]);
+    }
 
     $(`#id-match-btn-${k}`).click(function () {
+        if(dto["matchPlayerDtoList"][0].length===0 || dto["matchPlayerDtoList"][1].length===0){
+            $(`#id-match-detail-${k}`).append(`<p class="has-text-danger is-size-5-desktop is-size-7-mobile">조기 몰수 처리로 해당 경기의 데이터가 불온전하여 조회하실 수 없습니다.</p>`);
+            $(`#id-match-btn-${k}`).attr('disabled',true);
+        }
         clickDetail(k, dto);
     });
 }
@@ -75,12 +81,8 @@ function clickDetail(k, dto) {
         if ($(`#id-match-detail-${k}`).text().length === 0) {
             $(`#id-match-detail-${k}`).append(`<div class="columns is-mobile has-background-info-light">
                             <div id="match-goals-${k}-0" class="column">
-                                <small><i class="fa fa-futbol"></i>&nbsp;45' 이브라히모비치</small><br>
-                                <small>66' </small>
                             </div>
                             <div id="match-goals-${k}-1"  class="column">
-                                <small>96' 이브라히모비치</small><br>
-                                <small>hello</small>
                             </div>
                         </div>
                         <div class="tabs is-centered is-toggle is-fullwidth is-justify-content-center">
@@ -93,7 +95,14 @@ function clickDetail(k, dto) {
                         </div>
                         <div>
                             <div id="squad-${k}" class="container tab_content inner ${k}">
-                                <p>스쿼드예용</p>
+<div class="field has-text-centered">
+  <span class="has-text-weight-bold"> 도전자&nbsp;</span>
+  <input id="switch-squad-${k}" type="checkbox" name="switch-squad-${k}" class="switch is-success" checked="checked">
+  <label class="has-text-weight-bold" for="switch-squad-${k}">&nbsp;</label><span class="has-text-weight-bold">당신</span>
+</div>
+    <div id="squad-all-${k}-true">${squadHtml(k, 0)}</div>
+    <div id="squad-all-${k}-false" style="display: none">${squadHtml(k, 1)}</div>
+</div>
                             </div>
                             <div id="match-${k}" class="container tab_content inner ${k}">
                                 경기예용
@@ -106,6 +115,29 @@ function clickDetail(k, dto) {
                             </div>
                         </div>
                     </div>`);
+            $(`#switch-squad-${k}`).click(function () {
+                let status = $(`#switch-squad-${k}`).is(':checked');
+                $(`#squad-all-${k}-${!status}`).css('display', 'none');
+                $(`#squad-all-${k}-${status}`).css('display', 'block');
+            });
+            getOneMatchInfo(dto, k);
+            let pIdSet = new Set();
+            dto.matchPlayerDtoList.map(value => value.forEach(function (item) {
+                let cook = getCookie(item.spId);
+                if (cook === null) {
+                    pIdSet.add(item.spId);
+                } else {
+                    let player = JSON.parse(cook);
+                    addClasForPlayer(player);
+                }
+            }));
+            pIdSet.forEach(value =>
+                getPlayerInfo(value)
+                    .done(function (result) {
+                        let player = result.data;
+                        addClasForPlayer(player);
+                    })
+            )
         }
         $(`.tab_content.inner.${k}`).hide(); //Hide all content
         $(`#squad-${k}`).addClass("active").show(); //Activate first tab
@@ -118,19 +150,71 @@ function clickDetail(k, dto) {
             $(activeTab).fadeIn(); //Fade in the active ID content
             return false;
         });
-        getOneMatchInfo(dto, k);
-
     } else {
         detailDiv.style.display = "none";
     }
 }
 
+function addClasForPlayer(player) {
+    let pId = player.info.playerId;
+    let pName = player.info.playerName;
+    Array.prototype.slice.call(document.querySelectorAll(`.get-${pId}-name`))
+        .map(v => v.textContent = (pName.length < 8) ? pName : pName.split(' ')[1]);
+    Array.prototype.slice.call(document.querySelectorAll(`.get-${pId}-img`))
+        .map(v => v.src = player.pimg);
+    Array.prototype.slice.call(document.querySelectorAll(`.get-${pId}-simg`))
+        .map(v => v.src = player.info.season.img);
+}
+
 function getOneMatchInfo(dto, k) {
+
+    let myshoot = sortDto(dto.shootDtoList[0], "goalTime");
+    let yourshoot = sortDto(dto.shootDtoList[1], "goalTime");
+    putGoalInfo(myshoot, k, 0);
+    putGoalInfo(yourshoot, k, 1);
+    putSquad(dto.matchPlayerDtoList[0], k, 0);
+    putSquad(dto.matchPlayerDtoList[1], k, 1);
 }
 
-function putGoals(shootDto, k) {
-
+function putGoalInfo(shootDto, k, idx) {
+    for (let obj of shootDto) {
+        if (obj.result === 3) {
+            $(`#match-goals-${k}-${idx}`).append(`
+            <small><i class="fa fa-futbol"></i>&nbsp;${obj.goalTime}'<span class="get-${obj.spId}-name"></span></small><br>`);
+        }
+    }
 }
+
+function putSquad(playerDto, k, idx) {
+    for (let obj of playerDto) {
+        if (obj.spPosition !== 28) {
+            $(`#sqd-${k}-${idx}-${obj.spPosition}`).append(`
+            <figure class="image is-96x96 resp is-inline-block mt-1 is-relative">
+                        <img class="image pos-taeduri-${obj.rootPosName} get-${obj.spId}-img"  src="" alt="player">
+                         <img class="image get-${obj.spId}-simg" style="position: absolute;bottom: 0;left: 0;width: 25%;height: 25%" src="" alt="season">
+                             <img class="image" style="position: absolute;bottom: 0;right: 0;width: 25%;height: 25%" src="/img/e${obj.spGrade}.png">
+                    </figure>
+                    <p class="myp has-text-white" style="margin-top: -8px;margin-bottom: -8px;"><small class="get-${obj.spId}-name"></small></p>
+                    <p class="myp sub pos-color-${obj.rootPosName}"><small>${obj.posName}</small></p>
+            `);
+        } else {
+            $(`#sqd-${k}-${idx}-28`)
+                .append(`<div class="column mywidth-16">
+<figure class="image is-96x96 resp is-inline-block mt-1 is-relative">
+                        <img class="image hovsub pos-taeduri-${obj.rootPosName} get-${obj.spId}-img"  src="" alt="player">
+                         <img class="image get-${obj.spId}-simg" style="position: absolute;bottom: 0;left: 0;width: 25%;height: 25%" src="" alt="season">
+                             <img class="image" style="position: absolute;bottom: 0;right: 0;width: 25%;height: 25%" src="/img/e${obj.spGrade}.png">
+                    </figure>
+                    <p class="myp has-text-black verysmall" style="margin-top: -8px;margin-bottom: -8px;"><small id="subs-${k}-${idx}-${obj.spId}" class="get-${obj.spId}-name"></small></p>                 
+                         </div>                                        
+`);
+            $(`.image.hovsub.get-${obj.spId}-img`).hover(function () {
+                $(`#mobilehovertext-name`).text($(`#subs-${k}-${idx}-${obj.spId}`).text());
+            });
+        }
+    }
+}
+
 
 function getMatchCodeList(userid) {
     return $.ajax({
@@ -191,10 +275,12 @@ function getMoreMatch(id) {
             }, 3);
         });
     }
+
     async function paral(matches) {
         const result = matches.map((param, k) => asyncMoreMatches(param, k));
         return await Promise.all(result);
     }
+
     paral(newMatchList).then(value => {
         for (let k = 0; k < value.length; k++) {
             getViewMatches(value[k], index + k);
@@ -240,8 +326,6 @@ function getSummaryInfo(userid, dtos) {
     let yourpassDto = [];
     let dribbles = [0, 0];
     for (let dto of dtos) {
-        goal[0] += dto.basicDtoList[0].goalTotal;
-        goal[1] += dto.basicDtoList[1].goalTotal;
         let result = dto.basicDtoList[0].matchResult;
         if (result === "승") {
             wdl[0]++;
@@ -250,6 +334,10 @@ function getSummaryInfo(userid, dtos) {
         } else {
             wdl[2]++;
         }
+        if(dto.matchPlayerDtoList[0].length===0 || dto.matchPlayerDtoList[1].length===0){
+            continue;
+        }
+        idx += 1;
         let matchPlayers = dto.matchPlayerDtoList[0];
         for (let j = 0; j < matchPlayers.length; j++) {
             if (matchPlayers[j].spPosition !== 28) {
@@ -259,8 +347,6 @@ function getSummaryInfo(userid, dtos) {
             }
         }
         let summary = dto.summaryDtoList;
-        if (dto.matchPlayerDtoList[0].length !== 0 && dto.matchPlayerDtoList[1].length !== 0) {
-            idx += 1;
             poss += summary[0].possession;
             shoots1[0] += summary[0].shootTotal;
             shoots1[1] += summary[0].effectiveShootTotal;
@@ -268,7 +354,8 @@ function getSummaryInfo(userid, dtos) {
             shoots2[1] += summary[1].effectiveShootTotal;
             mypassDto.push(dto.passDtoList[0]);
             yourpassDto.push(dto.passDtoList[1]);
-        }
+            goal[0] += dto.basicDtoList[0].goalTotal;
+            goal[1] += dto.basicDtoList[1].goalTotal;
     }
     getGoalBar(goal, dtos.length);
     getWdlDonut(wdl, dtos.length);
@@ -520,7 +607,7 @@ function getHTMLMatches(basic, owngoals, k) {
                         <div class="content has-text-weight-bold is-size-4-desktop is-size-7-mobile">
                             <span>
                                 <i class="fa fa-${controllers}"></i>
-                            &nbsp;&nbsp;${mybasic.nickname}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${mybasic.goalTotal + owngoals[1]} : ${yourbasic.goalTotal + owngoals[0]}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${yourbasic.nickname}&nbsp;&nbsp;
+                            &nbsp;&nbsp;<span id="uname-${k}-0">${mybasic.nickname}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${mybasic.goalTotal + owngoals[1]} : ${yourbasic.goalTotal + owngoals[0]}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${yourbasic.nickname}&nbsp;&nbsp;
                                 <i class="fa fa-${controllers}"></i>
                             </span>
                         </div>
@@ -547,4 +634,76 @@ function dtoReducer(keys, obj) {
         }
         return pre;
     });
+}
+
+function sortDto(dto, key) {
+    return dto.sort(function (o1, o2) {
+        return o1[key] - o2[key]
+    });
+}
+
+function addPlayerCooc(playerDto) {
+    console.log("과자먹을래?");
+    playerDto.map(value => getPlayerInfo(value.spId)
+        .done(function (result) {
+            setCookie(value.spId, JSON.stringify(result.data), window.location.pathname);
+        }));
+}
+
+function squadHtml(k, idx) {
+    return `
+<div class="column is-mobile" style="background: url(/img/soccerfield.png) no-repeat 0 0;background-size:100% 100%;">
+<div class="columns is-mobile">
+        <div class="column is-one-fifth has-text-centered">&nbsp;</div>
+        <div id="sqd-${k}-${idx}-26" class="column is-one-fifth has-text-centered"></div>
+        <div id="sqd-${k}-${idx}-25" class="column is-one-fifth has-text-centered"></div>
+        <div id="sqd-${k}-${idx}-24" class="column is-one-fifth has-text-centered"></div>
+        <div class="column is-one-fifth has-text-centered">&nbsp;</div>
+</div>
+<div class="columns is-mobile">
+    <div id="sqd-${k}-${idx}-27" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-22" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-21" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-20" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-23" class="column is-one-fifth "></div>                                        
+</div>
+<div class="columns is-mobile">
+    <div class="column is-one-fifth"></div>                                        
+    <div id="sqd-${k}-${idx}-19" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-18" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-17" class="column is-one-fifth "></div>                                        
+    <div class="column is-one-fifth "></div>                                     
+</div>
+<div class="columns is-mobile">
+    <div id="sqd-${k}-${idx}-16" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-15" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-14" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-13" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-12" class="column is-one-fifth "></div>
+    </div>
+<div class="columns is-mobile">
+    <div id="sqd-${k}-${idx}-8" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-11" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-10" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-9" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-2" class="column is-one-fifth "></div>                                        
+</div>
+<div class="columns is-mobile">
+    <div id="sqd-${k}-${idx}-7" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-6" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-5" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-4" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-3" class="column is-one-fifth "></div>                                        
+</div>
+<div class="columns is-mobile">
+    <div class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-1" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-0" class="column is-one-fifth "></div>                                        
+    <div class="column is-one-fifth "></div>                                        
+</div>                      
+</div>
+<div class="has-text-centered has-text-weight-bold is-size-3-desktop is-size-5-mobile mt-1"><p>교체선수</p><hr></div>
+<div id="sqd-${k}-${idx}-28" class="columns is-mobile">
+</div>
+<p id="mobilehovertext-name" class="has-text-weight-bold">&nbsp;</p>`
 }
