@@ -95,6 +95,8 @@ public class MatchDto {
         private int yellowCards;
         private int redCards;
         private double spRating;
+        private String posName;
+        private String rootPosName;
     }
 
     @AllArgsConstructor
