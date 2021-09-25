@@ -107,6 +107,17 @@ function clickDetail(k, dto) {
 </div>
                             </div>
                             <div id="match-${k}" class="container tab_content inner ${k}">
+<div class="columns">
+<div class="column is-one-third has-text-centered is-justify-content-center">
+    <div id="poss-chart-${k}" style="width: fit-content; display: inline-block"></div>
+</div>
+<hr>
+<div id="pass-chart-${k}" class="column is-two-thirds p-0"></div>
+</div>
+<hr>
+<div class="has-text-centered is-fullwidth p-0">
+    <div id="hobar-${k}-0"></div>
+</div>                               
                             </div>
                             <div id="player-${k}" class="container tab_content inner ${k}">
 <div class="field has-text-centered">
@@ -136,8 +147,15 @@ function clickDetail(k, dto) {
                 $(`#player-all-${k}-${!status}`).css('display', 'none');
                 $(`#player-all-${k}-${status}`).css('display', 'block');
             });
+            let mySummary = dto.summaryDtoList[0];
+            let yourSummary = dto.summaryDtoList[1];
             addPlayerTableData(k, 0, sortDto(dto.matchPlayerDtoList[0], "spPosition"));
             addPlayerTableData(k, 1, sortDto(dto.matchPlayerDtoList[1], "spPosition"));
+            let sumarryKeys = ['shootTotal', 'effectiveShootTotal', 'cornerKick', 'shootFreekick', 'offsideCount'
+                , 'foul', 'ownGoal', 'yellowCards', 'redCards'];
+            getMatchHorBar(k, 0, dto.summaryDtoList, sumarryKeys, myname, yourname);
+            getPossChart(k, mySummary["possession"], yourSummary["possession"], myname, yourname);
+            getPassChart(k, myname, dto.passDtoList[0]);
             getOneMatchInfo(dto, k);
             let pIdSet = new Set();
             dto.matchPlayerDtoList.map(value => value.forEach(function (item) {
@@ -755,26 +773,173 @@ function playerTableHTML(k, idx) {
 </table>`;
 }
 
+function getMatchHorBar(k, idx, summaryDtoList, keys, myname, yourname) {
+    var options = {
+        series: [
+            {
+                name: '',
+                data: [1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5]
+            },
+            {
+                name: '',
+                data: [-1.5, -1.5, -1.5, -1.5, -1.5, -1.5, -1.5, -1.5, -1.5]
+            },
+            {
+                name: yourname,
+                data: keys.map(v => summaryDtoList[1][v] + 1)
+            },
+            {
+                name: myname,
+                data: keys.map(v => -(summaryDtoList[0][v]) - 1)
+            }
+        ],
+        chart: {
+            type: 'bar',
+            height: 440,
+            stacked: true,
+            toolbar: {
+                show: false
+            }
+        },
+        colors: ['#FFFFFF', '#FFFFFF', '#FF4560', '#008FFB'],
+        plotOptions: {
+            bar: {
+                horizontal: true,
+                barHeight: '80%',
+            },
+        },
+        dataLabels: {
+            enabled: true,
+            textAnchor: 'end',
+            style: {
+                colors: ['#000000', '#000000', '#FFFFFF', '#FFFFFF'],
+                fontWeight: 'bold',
+            },
+            formatter: function (value, {seriesIndex, dataPointIndex, w}) {
+                let lab = w.config.xaxis.categories[dataPointIndex].toString();
+                let labLen = lab.length;
+                if (seriesIndex === 0) {
+                    return lab.substr(labLen / 2, labLen);
+                } else if (seriesIndex === 1) {
+                    return lab.substr(0, labLen / 2);
+                } else {
+                    return Math.abs(value) - 1;
+                }
+            }
+        },
+        stroke: {
+            width: 1,
+            colors: ["#fff"]
+        },
+        grid: {
+            show: false,
+            xaxis: {
+                show: false
+            },
+            yaxis: {
+                show: false
+            }
+        },
+        fill: {opacity: [0, 0, 1, 1]},
+        yaxis: {
+            min: -13,
+            max: 13,
+            labels: {
+                show: false,
+                align: 'center',
+                style: {
+                    colors: ['#000000'],
+                    zIndex: 9999,
+                    opacity: 1.5,
+                },
+                offsetX: $(`#hobar-${k}-0`).innerWidth() * 0.5
+            },
+            axisBorder: {
+                show: false
+            }
+        },
+        tooltip: {
+            enabled: false,
+            x: {
+                show: false
+            },
+            y: {
+                show: false
+            }
+        },
+        title: {
+            text: myname + ' vs ' + yourname,
+            align: 'center',
+            style: {
+                fontWeight: 'bold'
+            }
+        },
+        xaxis: {
+            categories: ['슈팅', '유효슈팅', '코너킥 ', '프리킥 ', '옵사', '파울', '자책골 ', '경고', '퇴장'
+            ],
+            labels: {
+                show: false
+            },
+            axisBorder: {
+                show: false
+            }
+        },
+        responsive: [
+            {
+                breakpoint: 780,
+                options: {
+                    dataLabels: {
+                        style: {
+                            fontSize: '7'
+                        }
+                    }
+                }
+            },
+            {
+                breakpoint: 480,
+                options: {
+                    dataLabels: {
+                        style: {
+                            fontSize: '5'
+                        }
+                    },
+                    plotOptions:{
+                        bar: {
+                            barHeight: '65%'
+                        }
+                    },
+                    chart: {
+                        height: 350
+                    }
+                }
+            }
+        ]
+    }
+    var chart = new ApexCharts(document.querySelector(`#hobar-${k}-${idx}`), options);
+    chart.render();
+}
+
 function addPlayerTableData(k, idx, playerDto) {
     let tableArr = ['spRating', 'shoot', 'effectiveShoot', 'goal', 'assist', 'passTry', 'passSuccess',
         'dribbleTry', 'dribbleSuccess', 'intercept', 'block', 'tackleTry', 'tackle', 'yellowCards', 'redCards'];
-    let player = playerDto.slice(0,11);
+    let player = playerDto.slice(0, 11);
     for (let p of player) {
-        let start = `<tr><td class="get-${p.spId}-name mytable-no-scroll has-text-left has-text-weight-bold" style="white-space: nowrap"></td><td class="pos-color-${p.rootPosName}"><small>${p.posName}</small></td>`;
+        let start = `<tr><td class="get-${p.spId}-name mytable-no-scroll has-text-left has-text-weight-bold" style="white-space: nowrap"></td><td class="pos-color-${p.rootPosName}"><small style="background-color: white">${p.posName}</small></td>`;
         tableArr.map(value => {
             start += '<td>' + p[value] + '</td>';
         });
         $(`#tbod-${k}-${idx}`).append(`${start}</tr>`);
     }
 }
-function tbSorter(k , idx , index,t){
+
+function tbSorter(k, idx, index, t) {
     let clas = $(t).attr('class');
     let sortType = (clas.indexOf('down') === -1) ? 'up' : 'down';
     var checkSort = true;
     var target = $(`#tbod-${k}-${idx}`).find('tr');
     while (checkSort) {
         checkSort = false;
-        target.each(function(i, row) {
+        target.each(function (i, row) {
             if (row.nextSibling == null) return;
             var fCell = parseFloat(row.cells[index].innerHTML);
             var sCell = parseFloat(row.nextSibling.cells[index].innerHTML);
@@ -788,5 +953,159 @@ function tbSorter(k , idx , index,t){
             }
         });
     }
-    $(t).attr('class',clas.replace(sortType , (sortType==='up') ? 'down' : 'up'));
+    $(t).attr('class', clas.replace(sortType, (sortType === 'up') ? 'down' : 'up'));
+}
+
+function getPassChart(k, myname, passDto) {
+
+    var options = {
+        series: [{
+            name: '숏패스',
+            data: [passDto.shortPassTry + 1, passDto.shortPassSuccess + 1]
+        }, {
+            name: '스루패스',
+            data: [passDto.throughPassTry + 1, passDto.throughPassSuccess + 1]
+        }, {
+            name: '롱패스',
+            data: [passDto.longPassTry + 1, passDto.longPassSuccess + 1]
+        }, {
+            name: '로빙패스',
+            data: [passDto.lobbedThroughPassTry + passDto.bouncingLobPassTry + 1,
+                passDto.lobbedThroughPassSuccess + passDto.bouncingLobPassSuccess + 1]
+        }, {
+            name: '드리븐패스',
+            data: [passDto.drivenGroundPassTry + 1, passDto.drivenGroundPassSuccess + 1]
+        }],
+        chart: {
+            type: 'bar',
+            width: '99%',
+            height: '80%',
+            stacked: true,
+            toolbar: {
+                show: false
+            }
+        },
+        plotOptions: {
+            bar: {
+                horizontal: true
+            }
+        },
+        stroke: {
+            width: 1,
+            colors: ['#fff']
+        },
+        title: {
+            text: myname + "님의 패스기록",
+            style: {
+                fontWeight: 'bolder',
+            },
+            align: 'center'
+        },
+        xaxis: {
+            categories: ["시도", "성공"],
+            labels: {
+                show: false,
+            },
+            axisBorder: {
+                show: false
+            }
+        },
+        yaxis: {
+            labels: {
+                show: true,
+                align: 'right',
+                style: {
+                    colors: ['#000000', '#1E7CEC']
+                }
+            }
+        },
+        fill: {
+            opacity: 0.9
+        },
+        legend: {
+            position: 'top',
+            horizontalAlign: 'left',
+            offsetX: 0,
+            formatter: function(seriesName) {
+                return [seriesName.toString().replace("패스","")];
+            }
+        },
+        grid: {
+            show: false,
+            xaxis: {
+                lines: {
+                    show: false
+                }
+            },
+            yaxis: {
+                lines: {
+                    show: false
+                }
+            }
+        },
+        dataLabels: {
+            formatter(val) {
+                return val - 1;
+            }
+        },
+        tooltip: {
+            shared: false,
+            y: {
+                formatter: function (val) {
+                    return val - 1;
+                }
+            }
+        },
+        responsive: [
+            {
+                breakpoint: 480,
+                options: {
+                    yaxis: {
+                        labels: {
+                            style: {
+                                fontSize: '6'
+                            }
+                        }
+                    },
+                    plotOptions:{
+                        bar: {
+                            barHeight: '45%'
+                        }
+                    }
+                }
+            }
+        ]
+    };
+    var chart = new ApexCharts(document.querySelector(`#pass-chart-${k}`), options);
+    chart.render();
+}
+
+function getPossChart(k, myPo, yourPo, myname, yourname) {
+    var options = {
+        series: [myPo, yourPo],
+        chart: {
+            width: 260,
+            type: 'pie',
+            foreColor: '#000000',
+            toolbar: {
+                show: false
+            }
+        },
+        title: {
+            text: `점유율`,
+            align: 'center'
+        },
+        labels: [myname, yourname],
+        dataLabels: {
+            formatter(val, opts) {
+                const name = opts.w.globals.labels[opts.seriesIndex]
+                return [name, val.toFixed(1) + '%']
+            }
+        },
+        legend: {
+            show: false
+        }
+    };
+    var chart = new ApexCharts(document.querySelector(`#poss-chart-${k}`), options);
+    chart.render();
 }
