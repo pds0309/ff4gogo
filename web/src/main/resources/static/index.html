@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>피온4 GG</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/15181efa86.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="/css/bulma.css">
+    <link rel="stylesheet" href="/css/main.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.js"
+            integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
+            crossorigin="anonymous"></script>
+    <script src="/js/search.js"></script>
+    <script src="/js/ind.js"></script>
+</head>
+<body>
+<section id="id-index-title" class="hero is-medium has-text-centered">
+    <div class="hero-body">
+        <div class="container">
+            <h1 class="title is-0 ">피온4 고고</h1>
+            <h2 class="title is-5">FIFAONLINE4 <br>Openapi 기반 조회 서비스</h2><br><br>
+            <input id="id-txt-user" class="input is-rounded is-medium has-text-centered" placeholder="닉네임 입력" onkeyup="this.value=this.value.replace(/[^a-zA-z0-9ㄱ-힣]/g,'');"><br><br>
+            <button onclick="searchUsers()" class="button is-white is-medium is-inverted has-text-weight-bold">유저 조회&nbsp;<i class="fad fa-search"></i>
+            </button>
+            <br><br><br>
+        </div>
+    </div>
+</section>
+<section id="parallax-2" class="hero is-large">
+    <div class="hero-body">
+        <div class="container">
+            <h1 class="title is-1 has-text-centered" th:text="|${thisseason} 시즌|">202109시즌</h1>
+            <p class="title is-4 has-text-centered" th:text="|${matchnum} 경기 Top Players|">10563 경기 Top Player</p>
+            <div class="tabs is-centered is-toggle is-toggle-rounded is-fullwidth is-justify-content-center">
+                <ul class="has-text-weight-bold column  tabs outer">
+                    <li class="is-active"><a href="#id-tab1">출장</a></li>
+                    <li><a href="#id-tab2">승률</a></li>
+                    <li><a href="#id-tab3">득점</a></li>
+                    <li><a href="#id-tab4">평점</a></li>
+                </ul>
+            </div>
+            <div>
+                <div id="id-tab1" class="container has-text-centered tab_content outer">
+                    <div class="tile is-ancestor">
+                        <div class="tile is-child p-1" th:each="stat,index:${topcnt}">
+                            <article class="tile is-child box is-relative">
+                                <i th:if="${index.index}<=2" th:class="|fa fa-crown king-icon k-${index.index}|"></i>
+                                <figure class="card-image is-128x128">
+                                    <div style="width: fit-content; display: inline-block">
+                                        <img class="is-rounded" th:with="pimg=${stat.getStatId().getPlayer().getPlayerId()}%(${stat.getStatId().getPlayer().getSeason().getId()}*10000)"
+                                             th:onerror="|this.onerror=null;this.src='https://fo4.dn.nexoncdn.co.kr/live/externalAssets/common/players/p${pimg}.png'|"
+                                             th:src="|http://fo4.dn.nexoncdn.co.kr/live/externalAssets/common/playersAction/p${stat.getStatId.getPlayer.getPlayerId}.png|"
+                                             src="https://ff4ggimages.s3.ap-northeast-2.amazonaws.com/unknown.png">
+                                        <img style="position: absolute;top: 79%" class="image" th:src="${stat.getStatId().getPlayer().getSeason().getImg()}"
+                                             src="https://ssl.nexon.com/s2/game/fo4/obt/externalAssets/season/gr.png">
+                                    </div>
+                                </figure>
+                                <p class="is-size-6 has-text-weight-bold" th:text="${stat.statId.getPlayer().getPlayerName()}">즐라탄 이브라히모비치</p>
+                                <p><span class="has-text-primary has-text-weight-bold" th:text="${stat.getCnt()}">7.75</span> 회 출장</p>
+                            </article>
+                        </div>
+                    </div>
+                </div>
+                <div id="id-tab2" class="container has-text-centered tab_content outer">
+                    <div class="tile is-ancestor">
+                        <div class="tile is-child p-1" th:each="stat,index:${topwin}">
+                            <article class="tile is-child box is-relative">
+                                <i th:if="${index.index}<=2" th:class="|fa fa-crown king-icon k-${index.index}|"></i>
+                                <figure class="card-image is-128x128">
+                                    <div style="width: fit-content; display: inline-block">
+                                        <img class="is-rounded" th:with="pimg=${stat.getStatId().getPlayer().getPlayerId()}%(${stat.getStatId().getPlayer().getSeason().getId()}*10000)"
+                                             th:onerror="|this.onerror=null;this.src='https://fo4.dn.nexoncdn.co.kr/live/externalAssets/common/players/p${pimg}.png'|"
+                                             th:src="|http://fo4.dn.nexoncdn.co.kr/live/externalAssets/common/playersAction/p${stat.getStatId.getPlayer.getPlayerId}.png|"
+                                             src="https://ff4ggimages.s3.ap-northeast-2.amazonaws.com/unknown.png">
+                                        <img style="position: absolute;top: 79%" class="image" th:src="${stat.getStatId().getPlayer().getSeason().getImg()}"
+                                             src="https://ssl.nexon.com/s2/game/fo4/obt/externalAssets/season/gr.png">
+                                    </div>
+                                </figure>
+                                <p class="is-size-6 has-text-weight-bold"  th:text="${stat.statId.getPlayer().getPlayerName()}">즐라탄 이브라히모비치</p>
+                                <p>승률 <span class="has-text-success-dark has-text-weight-bold" th:text="| ${#numbers.formatDecimal(stat.getWin()*100,0,2)} %|">0%</span></p>
+                                <!--                                <a class="button">조회하기</a>-->
+                            </article>
+                        </div>
+                    </div>
+                </div>
+                <div id="id-tab3" class="container has-text-centered tab_content outer">
+                    <div class="tile is-ancestor">
+                        <div class="tile is-child p-1" th:each="stat,index:${topgoal}">
+                            <article class="tile is-child box is-relative">
+                                <i th:if="${index.index}<=2" th:class="|fa fa-crown king-icon k-${index.index}|"></i>
+                                <figure class="card-image is-128x128">
+                                    <div style="width: fit-content; display: inline-block">
+                                        <img class="is-rounded" th:with="pimg=${stat.getStatId().getPlayer().getPlayerId()}%(${stat.getStatId().getPlayer().getSeason().getId()}*10000)"
+                                             th:onerror="|this.onerror=null;this.src='https://fo4.dn.nexoncdn.co.kr/live/externalAssets/common/players/p${pimg}.png'|"
+                                             th:src="|http://fo4.dn.nexoncdn.co.kr/live/externalAssets/common/playersAction/p${stat.getStatId.getPlayer.getPlayerId}.png|"
+                                             src="https://ff4ggimages.s3.ap-northeast-2.amazonaws.com/unknown.png">
+                                        <img style="position: absolute;top: 79%" class="image" th:src="${stat.getStatId().getPlayer().getSeason().getImg()}"
+                                             src="https://ssl.nexon.com/s2/game/fo4/obt/externalAssets/season/gr.png">
+                                    </div>
+                                </figure>
+                                <p class="is-size-6 has-text-weight-bold" th:text="${stat.statId.getPlayer().getPlayerName()}">즐라탄 이브라히모비치</p>
+                                <p>평균 득점 <span class="has-text-danger-dark has-text-weight-bold" th:text="${#numbers.formatDecimal(stat.getGoal(),0,2)}">0.0</span></p>
+                                <!--                                <a class="button">조회하기</a>-->
+                            </article>
+                        </div>
+                    </div>
+                </div>
+                <div id="id-tab4" class="container has-text-centered tab_content outer">
+                    <div class="tile is-ancestor">
+                            <div class="tile is-child p-1" th:each="stat,index:${toprating}">
+                            <article class="tile is-child box is-relative">
+                                <i th:if="${index.index}<=2" th:class="|fa fa-crown king-icon k-${index.index}|"></i>
+                                <figure class="card-image is-128x128">
+                                    <div style="width: fit-content; display: inline-block">
+                                        <img class="is-rounded" th:with="pimg=${stat.getStatId().getPlayer().getPlayerId()}%(${stat.getStatId().getPlayer().getSeason().getId()}*10000)"
+                                             th:onerror="|this.onerror=null;this.src='https://fo4.dn.nexoncdn.co.kr/live/externalAssets/common/players/p${pimg}.png'|"
+                                             th:src="|http://fo4.dn.nexoncdn.co.kr/live/externalAssets/common/playersAction/p${stat.getStatId.getPlayer.getPlayerId}.png|"
+                                             src="https://ff4ggimages.s3.ap-northeast-2.amazonaws.com/unknown.png">
+                                        <img style="position: absolute;top: 79%" class="image" th:src="${stat.getStatId().getPlayer().getSeason().getImg()}"
+                                             src="https://ssl.nexon.com/s2/game/fo4/obt/externalAssets/season/gr.png">
+                                    </div>
+                                </figure>
+                                <p class="is-size-6 has-text-weight-bold" th:text="${stat.statId.getPlayer().getPlayerName()}">즐라탄 이브라히모비치</p>
+                                <p>평균 평점 <span class="has-text-link has-text-weight-bold" th:text="${#numbers.formatDecimal(stat.getStar(),0,2)}">0.0</span></p>
+                                <!--                                <a class="button">조회하기</a>-->
+                            </article>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="has-text-centered has-text-white">
+                <br><br>
+                <p>시즌 내 <span class="has-text-warning" th:text="${standardcnt}"></span> 경기 이상 출천한 선수들에 대한 정보입니다.</p>
+                <br><br>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer class="footer">
+    <div class="content has-text-centered">
+        <p>
+            <strong><a href="https://jgthms.com">FifaOnline4 Open-Api</a></strong> based. <br>
+            <small>Title image by<a href="https://unsplash.com/">Unsplash</a>.</small><br>
+            &copy;2021 pds0309 <a href="mailto:ehd0309@naver.com"><i class="fa fa-envelope-square"></i></a>
+        </p>
+    </div>
+</footer>
+</body>
+</html>

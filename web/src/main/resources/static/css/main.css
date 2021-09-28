@@ -1,0 +1,214 @@
+
+.title {
+    color: white;
+    font-weight: bolder;
+    font-size: 4rem;
+    text-shadow: 1px 1px 1px #000, 3px 3px 5px rgb(0, 0, 3);
+}
+
+.title:hover {
+    color: greenyellow;
+}
+
+.subtitle {
+    color: white;
+    font-size: 1.2rem;
+    text-shadow: 1px 1px 1px #000, 3px 3px 5px rgb(0, 0, 3);
+}
+
+.subtitle.is-black {
+    color: black;
+    font-size: 1.2rem;
+    text-shadow: 1px 1px 1px #000, 1px 1px 1px rgb(0, 0, 3);
+}
+
+.hero {
+    background: url(data:image/svg+xml;charset=utf8,%3Csvg%20viewBox%3D%220%200%20512%20512%22%20width%3D%22512%22%20height%3D%22512%22%20version%3D%221.1%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cfilter%20id%3D%22noise%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.875%22%20result%3D%22noise%22%20%2F%3E%3CfeColorMatrix%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%200%200%200%200%200%200%200%200%200%200%200%200%200%200.4296875%200%22%20%2F%3E%3C%2Ffilter%3E%3Crect%20filter%3D%22url%28%23noise%29%22%20x%3D%220%22%20y%3D%220%22%20width%3D%22512%22%20height%3D%22512%22%20fill%3D%22transparent%22%20opacity%3D%221%22%20%2F%3E%3C%2Fsvg%3E), linear-gradient(52deg, #42475C 0%, #20222E 71%);
+}
+
+#id-index-title {
+    background: url(https://source.unsplash.com/featured/?stadium);
+    background-attachment: fixed;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    border-top: 10px solid rgb(1, 14, 1);
+}
+
+
+.king-icon {
+    position: absolute;
+    top: 1%;
+    z-index: 10;
+}
+
+.king-icon.k-0 {
+    color: yellow;
+    font-size: 1.3rem
+}
+
+.king-icon.k-1 {
+    color: silver;
+    font-size: 1.2rem
+}
+
+.king-icon.k-2 {
+    color: brown;
+    font-size: 0.9rem
+}
+
+
+.fa-redo:hover {
+    -webkit-transform: rotate(90deg); /* Chrome, Safari, Opera */
+    transform: rotate(90deg);
+    -webkit-transition: all 0.5s ease;
+}
+
+.tabs.is-green.is-toggle li.is-active a {
+    background-color: #0ae204;
+}
+
+.card-header-icon.hovable:hover {
+    background-color: #fff7f7;
+}
+
+.pos-taeduri-FW {
+    border-radius: 100%;
+    background-color: pink;
+    border: 1px solid red;
+}
+
+.pos-taeduri-MF {
+    border-radius: 100%;
+    background-color: greenyellow;
+    border: 1px solid #045304;
+}
+
+.pos-taeduri-DF {
+    border-radius: 100%;
+    background-color: lightskyblue;
+    border: 1px solid blue;
+}
+
+.pos-taeduri-GK {
+    border-radius: 100%;
+    background-color: #c6d93f;
+    border: 1px solid orange;
+}
+
+.pos-taeduri-SUB {
+    border-radius: 100%;
+    background-color: #d3dcc5;
+    border: 1px solid black;
+}
+
+.pos-color-FW > small {
+    color: #f69999;
+    background-color: black;
+}
+
+.pos-color-MF > small {
+    color: lightgreen;
+    background-color: black;
+}
+
+.pos-color-DF > small {
+    color: lightblue;
+    background-color: black;
+
+}
+
+.pos-color-GK > small {
+    color: #ecbf55;
+    background-color: black;
+}
+
+.myp > small {
+    font-size: 1.3em;
+    font-weight: bolder;
+}
+
+.myp.sub {
+    margin-top: -8px;
+    margin-bottom: -8px;
+}
+
+.column.mywidth-16 {
+    width: 16%;
+}
+
+#mobilehovertext-name {
+    display: none;
+}
+
+@media screen and (max-width: 768px) {
+    .myp > small {
+        -webkit-text-size-adjust: none;
+        -webkit-transform: scale(0.52);
+        white-space: nowrap;
+        margin-left: -100%;
+        margin-right: -100%;
+    }
+
+    .is-96x96.resp {
+        width: 48px;
+        height: 48px;
+    }
+
+    .column.mywidth-16 {
+        width: 11%;
+    }
+
+    .myp.verysmall > small {
+        display: none;
+    }
+
+    #mobilehovertext-name {
+        display: block;
+    }
+
+    .image.hovsub:hover {
+        -webkit-transform: scale(1.05);
+        border: red 1px solid;
+        background-color: #b5bbae;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .myp > small {
+        display: inline-block;
+        -webkit-transform: scale(0.43);
+        text-align: center;
+    }
+
+    .is-96x96.resp {
+        width: 32px;
+        height: 32px;
+    }
+
+    .myp.sub {
+        margin-top: -15px;
+    }
+
+    .mytable-no-scroll {
+        position: sticky;
+        z-index: 99;
+        left: 0;
+        background-color: white;
+    }
+}
+
+
+/*.shootscatter {*/
+/*    position: relative;*/
+/*    !*width: 100%;*!*/
+/*    !*height: 0;*!*/
+/*    !*padding-bottom: 30%;*!*/
+/*}*/
+
+.shootscatter > .apexcharts-canvas {
+    background: url('/img/soccerfield2.png') center center / cover no-repeat;
+/*    width : 100%;*/
+/*    height : 0;*/
+/*    padding-top : calc(100 / 1000 * 100%);*/
+}
