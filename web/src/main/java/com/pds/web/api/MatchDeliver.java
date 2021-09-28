@@ -3,6 +3,7 @@ package com.pds.web.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pds.common.enums.Positions;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -31,11 +32,22 @@ public final class MatchDeliver {
             List<MatchDto.ShootDto> shootList = new ArrayList<>();
             for (int j = 0; j < shootDetail.length(); j++) {
                 JSONObject shootOBJ = shootDetail.getJSONObject(j);
-                shootList.add((MatchDto.ShootDto)getDto(shootOBJ.toString(), MatchDto.ShootDto.class));
+                MatchDto.ShootDto shootDto = (MatchDto.ShootDto)getDto(shootOBJ.toString(), MatchDto.ShootDto.class);
+                shootDto.setGoalTime(calGoalTime(shootDto.getGoalTime()));
+                shootList.add(shootDto);
             }
             shootDtoList.add(shootList);
         }
         return shootDtoList;
+    }
+    static int calGoalTime(int time){
+        int realTime = 0;
+        if (time >= 16777220) {
+            realTime = (time - 16777220) / 60 + 45;
+        } else {
+            realTime = time / 60;
+        }
+        return realTime;
     }
 
     public static List<MatchDto.PassDto> passInfo(List<JSONObject> oneMatchList){
@@ -47,6 +59,8 @@ public final class MatchDeliver {
         return passDtoList;
     }
 
+    private static final String POS = "spPosition";
+
     public static List<List<MatchDto.MatchPlayerDto>> playerInfo(List<JSONObject> oneMatchList){
         List<List<MatchDto.MatchPlayerDto>> matchPlayerDtoList = new ArrayList<>();
         for (JSONObject jsonObject : oneMatchList) {
@@ -54,10 +68,13 @@ public final class MatchDeliver {
             List<MatchDto.MatchPlayerDto> matchPlayerList = new ArrayList<>();
             for (int j = 0; j < playerDetail.length(); j++) {
                 JSONObject playerOBJ = playerDetail.getJSONObject(j);
+                int pos = playerOBJ.getInt(POS);
                 JSONObject status = playerOBJ.getJSONObject("status");
                 status.put("spId",playerOBJ.getInt("spId"))
-                        .put("spPosition",playerOBJ.getInt("spPosition"))
-                        .put("spGrade",playerOBJ.getInt("spGrade"));
+                        .put(POS,pos)
+                        .put("spGrade",playerOBJ.getInt("spGrade"))
+                        .put("posName", Positions.getPos(pos).getPosInfo())
+                        .put("rootPosName",Positions.getPos(pos).getRootPosInfo());
                 matchPlayerList.add((MatchDto.MatchPlayerDto)getDto(status.toString(), MatchDto.MatchPlayerDto.class));
             }
             matchPlayerDtoList.add(matchPlayerList);
