@@ -133,7 +133,17 @@ function clickDetail(k, dto) {
 </div>
                             </div>
                             <div id="shoot-${k}" class="container tab_content inner ${k}">
-                                슛이예여ㅛㅇ
+<div class="has-text-black is-size-3-desktop is-size-5-mobile has-text-centered has-text-weight-bold">
+<p>슈팅분포</p><hr>
+</div>
+<div id="shoot-all-${k}" class="has-text-centered is-fullwidth p-0 shootscatter">
+</div>
+<hr>
+<div class="has-text-black is-size-3-desktop is-size-5-mobile has-text-centered has-text-weight-bold">
+<p>기대득점[xG]</p><hr>
+<p class="is-size-5-desktop is-size-7-mobile">준비중입니다!</p>
+</div>
+</div>
                             </div>
                         </div>
                     </div>`);
@@ -147,6 +157,7 @@ function clickDetail(k, dto) {
                 $(`#player-all-${k}-${!status}`).css('display', 'none');
                 $(`#player-all-${k}-${status}`).css('display', 'block');
             });
+            getOneMatchInfo(dto, k);
             let mySummary = dto.summaryDtoList[0];
             let yourSummary = dto.summaryDtoList[1];
             addPlayerTableData(k, 0, sortDto(dto.matchPlayerDtoList[0], "spPosition"));
@@ -156,7 +167,7 @@ function clickDetail(k, dto) {
             getMatchHorBar(k, 0, dto.summaryDtoList, sumarryKeys, myname, yourname);
             getPossChart(k, mySummary["possession"], yourSummary["possession"], myname, yourname);
             getPassChart(k, myname, dto.passDtoList[0]);
-            getOneMatchInfo(dto, k);
+            getShootChart(k, dto.shootDtoList, myname, yourname);
             let pIdSet = new Set();
             dto.matchPlayerDtoList.map(value => value.forEach(function (item) {
                 let cook = getCookie(item.spId);
@@ -903,7 +914,7 @@ function getMatchHorBar(k, idx, summaryDtoList, keys, myname, yourname) {
                             fontSize: '5'
                         }
                     },
-                    plotOptions:{
+                    plotOptions: {
                         bar: {
                             barHeight: '65%'
                         }
@@ -1026,8 +1037,8 @@ function getPassChart(k, myname, passDto) {
             position: 'top',
             horizontalAlign: 'left',
             offsetX: 0,
-            formatter: function(seriesName) {
-                return [seriesName.toString().replace("패스","")];
+            formatter: function (seriesName) {
+                return [seriesName.toString().replace("패스", "")];
             }
         },
         grid: {
@@ -1067,7 +1078,7 @@ function getPassChart(k, myname, passDto) {
                             }
                         }
                     },
-                    plotOptions:{
+                    plotOptions: {
                         bar: {
                             barHeight: '45%'
                         }
@@ -1107,5 +1118,146 @@ function getPossChart(k, myPo, yourPo, myname, yourname) {
         }
     };
     var chart = new ApexCharts(document.querySelector(`#poss-chart-${k}`), options);
+    chart.render();
+}
+
+function getShootChart(k, shootDtoList, myname, yourname) {
+    let dtos = [shootDtoList[0].map(v => [(v['x']), v['y']]),shootDtoList[1].map(v => [1-(v['x']), v['y']])];
+    let type = ['', '일반적인 슈팅', '정교한 슈팅', '헤더'];
+    let result = ['', '유효슈팅', '벗어나는 슈팅', '득점', '골대맞음'];
+    var options = {
+        series: [
+            {
+                name: myname,
+                type: 'scatter',
+                data: dtos[0]
+            }, {
+                name: yourname,
+                type: 'scatter',
+                data: dtos[1]
+            }
+        ],
+        chart: {
+            width: '100%',
+            type: 'line',
+            zoom: {
+                enabled: false
+            },
+            events: {
+                dataPointSelection: (event, chartContext, config) => {
+                    let who = config.seriesIndex;
+                    if(who>=2){
+                        return;
+                    }
+                    let info = config.w.config.series[who].data[config.dataPointIndex];
+                    let dto = shootDtoList[who].filter(it=>(it.x===info[0]||it.x===(1-info[0])) && it.y===info[1] && it.assist===true);
+                    if(dto.length!==0){
+                            config.w.config.series[2] = {
+                                name: '어시스트',
+                                data: [[info[0],info[1]],[Math.abs(who-dto[0].assistX),dto[0].assistY]]
+                            }
+                            chart.updateSeries(config.w.config.series);
+                    }
+                }
+            }
+        },
+        fill: {
+            type: ['solid' , 'solid'],
+        },
+        colors: ['#ff0000','#ffff00','#00FF00'],
+        markers: {
+            enabled: true,
+            size: [9, 9, 0]
+        },
+        xaxis: {
+            min: 0,
+            max: 1,
+            labels: {
+                show: false
+            },
+            axisBorder:{
+                show: false
+            },
+            axisTicks: {
+                show: false
+            }
+        },
+        yaxis: {
+            min: 0,
+            max: 1,
+            labels: {
+                show: false
+            }
+        },
+        grid: {
+            show: false,
+            xaxis: {
+                show: false
+            },
+            yaxis: {
+                show: false
+            }
+        },
+        legend: {
+            show: true,
+            fontSize: '19em',
+            fontWeight: 800,
+            position: 'top',
+            labels: {
+                colors: '#FFFFFF'
+            }
+        },
+        tooltip: {
+            enabled: true,
+            shared: false,
+            intersect: true,
+            enabledOnSeries: [0,1],
+            x: {
+                show: false,
+                formatter: function (series, value) {
+                    let curData = shootDtoList[value['seriesIndex']][value['dataPointIndex']];
+                    return [curData.goalTime + '` ' + $(`.get-${curData.spId}-name`)[0].innerText + '\n' + ((curData.hitPost) ? result[4] : result[curData.result])];
+                }
+            },
+            y: {
+                show: true,
+                formatter: function (series, value) {
+                    let curData = shootDtoList[value['seriesIndex']][value['dataPointIndex']];
+                    let x = curData.x;
+                    let gType = type[curData.type];
+                    return ['좌표(' + Math.round(x * 100) / 100 + ','
+                    + Math.round(series * 100) / 100 + ')\n'+gType];
+                }
+            }
+        },
+        responsive: [
+            {
+                breakpoint: 480,
+                options: {
+                    markers: {
+                        size: [3, 3, 0]
+                    },
+                    legend: {
+                        fontSize: '11px'
+                    },
+                    tooltip: {
+                        style: {
+                            fontSize: 6
+                        }
+                    }
+                }
+            },
+            {
+                breakpoint: 780,
+                options: {
+                    markers: {
+                        size: [5, 5, 0]
+                    }
+                }
+            }
+        ]
+    }
+
+    var chart = new ApexCharts(document.querySelector(`#shoot-all-${k}`), options);
     chart.render();
 }
