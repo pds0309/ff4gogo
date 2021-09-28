@@ -15,8 +15,26 @@ cache:
 script: "./gradlew clean build"
 after_success:
   - "./gradlew jacocoRootReport coveralls"
+
+before_deploy:
+  - zip -r ff4 *
+  - mkdir -p ff4gg
+  - mv ff4.zip ff4gg/ff4.zip
+deploy:
+  - provider: s3
+    access_key_id: "$AWS_ACCESS_KEY"
+    secret_access_key: "$AWS_SECRET_KEY"
+    bucket: ff4gogo
+    region: ap-northeast-2
+    skip_cleanup: true
+    acl: public_read
+    local_dir: ff4gg
+    wait-until-deployed: true
+    on:
+      repo: pds0309/ff4gogo
+      branch: master
+
 notifications:
   email:
     recipients:
       - ehd0309@naver.com
-dd:
