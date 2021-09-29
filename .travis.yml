@@ -35,20 +35,19 @@ deploy:
     on:
       repo: pds0309/ff4gogo
       branch: master
-
   - provider: codedeploy
-      access_key_id: "$AWS_ACCESS_KEY"
-      secret_access_key: "$AWS_SECRET_KEY"
-      bucket: ff4gogo
-      key: ff4.zip
-      bundle_type: zip
-      application: ff4gg-deploy-ubuntu-application
-      deployment_group: ff4gg-deploy-ubuntu-group
-      region: ap-northeast-2
-      wait-until-deployed: true
-      on:
-        repo: pds0309/ff4gogo
-        branch: master
+    access_key_id: "$AWS_ACCESS_KEY"
+    secret_access_key: "$AWS_SECRET_KEY"
+    bucket: ff4gogo
+    key: ff4.zip
+    bundle_type: zip
+    application: ff4gg-deploy-ubuntu-application
+    deployment_group: ff4gg-deploy-ubuntu-group
+    region: ap-northeast-2
+    wait-until-deployed: true
+    on:
+      repo: pds0309/ff4gogo
+      branch: master
 
 notifications:
   email:
