@@ -239,7 +239,7 @@ function putSquad(playerDto, k, idx) {
             <figure class="image is-96x96 resp is-inline-block mt-1 is-relative">
                         <img class="image pos-taeduri-${obj.rootPosName} get-${obj.spId}-img"  src="" alt="player">
                          <img class="image get-${obj.spId}-simg" style="position: absolute;bottom: 0;left: 0;width: 25%;height: 25%" src="" alt="season">
-                             <img class="image" style="position: absolute;bottom: 0;right: 0;width: 25%;height: 25%" src="/img/e${obj.spGrade}.png">
+                             <img class="image" style="position: absolute;bottom: 0;right: 0;width: 25%;height: 25%" src="/img/e${obj.spGrade}.PNG">
                     </figure>
                     <p class="myp has-text-white" style="margin-top: -8px;margin-bottom: -8px;"><small class="get-${obj.spId}-name"></small></p>
                     <p class="myp sub pos-color-${obj.rootPosName}"><small>${obj.posName}</small></p>
@@ -250,7 +250,7 @@ function putSquad(playerDto, k, idx) {
 <figure class="image is-96x96 resp is-inline-block mt-1 is-relative">
                         <img class="image hovsub pos-taeduri-${obj.rootPosName} get-${obj.spId}-img"  src="" alt="player">
                          <img class="image get-${obj.spId}-simg" style="position: absolute;bottom: 0;left: 0;width: 25%;height: 25%" src="" alt="season">
-                             <img class="image" style="position: absolute;bottom: 0;right: 0;width: 25%;height: 25%" src="/img/e${obj.spGrade}.png">
+                             <img class="image" style="position: absolute;bottom: 0;right: 0;width: 25%;height: 25%" src="/img/e${obj.spGrade}.PNG">
                     </figure>
                     <p class="myp has-text-black verysmall" style="margin-top: -8px;margin-bottom: -8px;"><small id="subs-${k}-${idx}-${obj.spId}" class="get-${obj.spId}-name"></small></p>                 
                          </div>                                        
