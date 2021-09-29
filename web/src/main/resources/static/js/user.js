@@ -135,6 +135,7 @@ function clickDetail(k, dto) {
                             <div id="shoot-${k}" class="container tab_content inner ${k}">
 <div class="has-text-black is-size-3-desktop is-size-5-mobile has-text-centered has-text-weight-bold">
 <p>슈팅분포</p><hr>
+<p id="shoot-all-warn-${k}" class="is-size-7-mobile has-text-danger"></p>
 </div>
 <div id="shoot-all-${k}" class="has-text-centered is-fullwidth p-0 shootscatter">
 </div>
@@ -249,8 +250,8 @@ function putSquad(playerDto, k, idx) {
                 .append(`<div class="column mywidth-16">
 <figure class="image is-96x96 resp is-inline-block mt-1 is-relative">
                         <img class="image hovsub pos-taeduri-${obj.rootPosName} get-${obj.spId}-img"  src="" alt="player">
-                         <img class="image get-${obj.spId}-simg" style="position: absolute;bottom: 0;left: 0;width: 25%;height: 25%" src="" alt="season">
-                             <img class="image" style="position: absolute;bottom: 0;right: 0;width: 25%;height: 25%" src="/img/e${obj.spGrade}.PNG">
+                         <img class="image get-${obj.spId}-simg" style="position: absolute;bottom: 0;left: 0;width: 29%;height: 29%" src="" alt="season">
+                             <img class="image" style="position: absolute;bottom: 0;right: 0;width: 29%;height: 29%" src="/img/e${obj.spGrade}.PNG">
                     </figure>
                     <p class="myp has-text-black verysmall" style="margin-top: -8px;margin-bottom: -8px;"><small id="subs-${k}-${idx}-${obj.spId}" class="get-${obj.spId}-name"></small></p>                 
                          </div>                                        
@@ -893,6 +894,9 @@ function getMatchHorBar(k, idx, summaryDtoList, keys, myname, yourname) {
             },
             axisBorder: {
                 show: false
+            },
+            axisTicks: {
+                show: false
             }
         },
         responsive: [
@@ -901,7 +905,7 @@ function getMatchHorBar(k, idx, summaryDtoList, keys, myname, yourname) {
                 options: {
                     dataLabels: {
                         style: {
-                            fontSize: '7'
+                            fontSize: '8'
                         }
                     }
                 }
@@ -911,16 +915,16 @@ function getMatchHorBar(k, idx, summaryDtoList, keys, myname, yourname) {
                 options: {
                     dataLabels: {
                         style: {
-                            fontSize: '5'
+                            fontSize: '7'
                         }
                     },
                     plotOptions: {
                         bar: {
-                            barHeight: '65%'
+                            barHeight: '80%'
                         }
                     },
                     chart: {
-                        height: 350
+                        height: 360
                     }
                 }
             }
@@ -1019,6 +1023,9 @@ function getPassChart(k, myname, passDto) {
             },
             axisBorder: {
                 show: false
+            },
+            axisTicks: {
+                show: false
             }
         },
         yaxis: {
@@ -1074,7 +1081,7 @@ function getPassChart(k, myname, passDto) {
                     yaxis: {
                         labels: {
                             style: {
-                                fontSize: '6'
+                                fontSize: '8'
                             }
                         }
                     },
@@ -1140,6 +1147,9 @@ function getShootChart(k, shootDtoList, myname, yourname) {
         chart: {
             width: '100%',
             type: 'line',
+            toolbar: {
+                show: false
+            },
             zoom: {
                 enabled: false
             },
@@ -1167,7 +1177,12 @@ function getShootChart(k, shootDtoList, myname, yourname) {
         colors: ['#ff0000','#ffff00','#00FF00'],
         markers: {
             enabled: true,
-            size: [9, 9, 0]
+            strokeWidth: 0.1,
+            size: [9, 9, 0],
+            hover: {
+                size: undefined,
+                sizeOffset: 0.5
+            }
         },
         xaxis: {
             min: 0,
@@ -1180,6 +1195,9 @@ function getShootChart(k, shootDtoList, myname, yourname) {
             },
             axisTicks: {
                 show: false
+            },
+            tooltip: {
+                enabled: false
             }
         },
         yaxis: {
@@ -1213,7 +1231,7 @@ function getShootChart(k, shootDtoList, myname, yourname) {
             intersect: true,
             enabledOnSeries: [0,1],
             x: {
-                show: false,
+                show: true,
                 formatter: function (series, value) {
                     let curData = shootDtoList[value['seriesIndex']][value['dataPointIndex']];
                     return [curData.goalTime + '` ' + $(`.get-${curData.spId}-name`)[0].innerText + '\n' + ((curData.hitPost) ? result[4] : result[curData.result])];
@@ -1235,29 +1253,32 @@ function getShootChart(k, shootDtoList, myname, yourname) {
                 breakpoint: 480,
                 options: {
                     markers: {
-                        size: [3, 3, 0]
+                        size: [3.5, 3.5, 0]
                     },
                     legend: {
-                        fontSize: '11px'
+                        fontSize: '10px'
                     },
                     tooltip: {
                         style: {
-                            fontSize: 6
+                            fontSize: '5px'
                         }
                     }
                 }
             },
             {
-                breakpoint: 780,
+                breakpoint: 760,
                 options: {
                     markers: {
-                        size: [5, 5, 0]
+                        size: [5.5, 5.5, 0]
                     }
                 }
             }
         ]
     }
-
+    if(isMobile()){
+        $(`#shoot-all-warn-${k}`).text("현재 기기에서는 어시스트 경로 확인이 제한됩니다.")
+        options.chart.events.dataPointSelection = undefined;
+    }
     var chart = new ApexCharts(document.querySelector(`#shoot-all-${k}`), options);
     chart.render();
 }
