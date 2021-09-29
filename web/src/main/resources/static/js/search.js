@@ -57,3 +57,6 @@ var getCookie = function (name) {
     return value ? value[2] : null;
 };
 
+function isMobile() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
