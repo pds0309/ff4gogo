@@ -1,0 +1,9 @@
+version: 0.0
+os: linux
+files:
+  - source:  /
+    destination: /home/ubuntu/ff4gogodir/build/
+hooks:
+  AfterInstall:
+    - location: rundeploy.sh
+      timeout: 360
