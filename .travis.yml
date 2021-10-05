@@ -48,6 +48,19 @@ deploy:
     on:
       repo: pds0309/ff4gogo
       branch: master
+  - provider: codedeploy
+    access_key_id: "$AWS_ACCESS_KEY2"
+    secret_access_key: "$AWS_SECRET_KEY2"
+    bucket: ff4gogo
+    key: ff4.zip
+    bundle_type: zip
+    application: springboot-deploytest-app
+    deployment_group: springboot-deploytest-group
+    region: ap-northeast-2
+    wait-until-deployed: true
+    on:
+      repo: pds0309/ff4gogo
+      branch: master
 
 notifications:
   email:
