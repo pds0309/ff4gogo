@@ -10,6 +10,7 @@ $(document).ready(function () {
         let gangsined = los.timestamp;
         postGangsin(gangsined);
         postDerBogi(los.allcode.length);
+        los = JSON.parse(localStorage.getItem(userid));
         getSummaryInfo(userid, los.detail);
         return;
     }
@@ -39,7 +40,8 @@ $(document).ready(function () {
                 return await Promise.all(promises);
             }
 
-            parallel(getMatch).then(value => {
+            parallel(getMatch).then(val => {
+                let value = val;
                 for (let k = 0; k < value.length; k++) {
                     getViewMatches(value[k], k);
                 }
@@ -52,7 +54,7 @@ $(document).ready(function () {
                 deleteFromLocal();
                 localStorage.setItem(userid, JSON.stringify(matches));
                 postDerBogi(matchList.length);
-                getSummaryInfo(userid, value);
+                getSummaryInfo(userid, JSON.parse(localStorage.getItem(userid)).detail);
             });
         })
 });
