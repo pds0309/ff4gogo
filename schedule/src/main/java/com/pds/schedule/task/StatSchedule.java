@@ -21,7 +21,7 @@ public class StatSchedule {
 
     private final StatRepository statRepository;
 
-    @Scheduled(cron = "0 0 13 * * ?")
+    @Scheduled(cron = "0 0 5 * * ?")
     public void cronStat(){
         updateStat();
         log.info("Stat 테이블 업데이트 완료");
