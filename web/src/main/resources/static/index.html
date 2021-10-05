@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>피온4 GG</title>
+    <meta property="og:title" content="피온4고고" />
+    <meta property="og:description" content="피파온라인4 순위경기 전적조회" />
+    <title>피온4 고고</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://kit.fontawesome.com/15181efa86.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="/css/bulma.css">
@@ -20,7 +22,7 @@
     <div class="hero-body">
         <div class="container">
             <h1 class="title is-0 ">피온4 고고</h1>
-            <h2 class="title is-5">FIFAONLINE4 <br>Openapi 기반 조회 서비스</h2><br><br>
+            <h2 class="title is-5">FIFAONLINE4 <br>순위경기 전적 조회 서비스</h2><br><br>
             <input id="id-txt-user" class="input is-rounded is-medium has-text-centered" placeholder="닉네임 입력" onkeyup="this.value=this.value.replace(/[^a-zA-z0-9ㄱ-힣]/g,'');"><br><br>
             <button onclick="searchUsers()" class="button is-white is-medium is-inverted has-text-weight-bold">유저 조회&nbsp;<i class="fad fa-search"></i>
             </button>
@@ -142,7 +144,7 @@
 <footer class="footer">
     <div class="content has-text-centered">
         <p>
-            <strong><a href="https://jgthms.com">FifaOnline4 Open-Api</a></strong> based. <br>
+            <strong><a href="https://jgthms.com">FifaOnline4 Open-Api</a></strong> based. <small th:text="${svst}"></small><br>
             <small>Title image by<a href="https://unsplash.com/">Unsplash</a>.</small><br>
             &copy;2021 pds0309 <a href="mailto:ehd0309@naver.com"><i class="fa fa-envelope-square"></i></a>
         </p>
