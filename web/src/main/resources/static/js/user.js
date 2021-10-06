@@ -9,7 +9,7 @@ $(document).ready(function () {
         }
         let gangsined = los.timestamp;
         postGangsin(gangsined);
-        postDerBogi(los.allcode.length);
+        postDerBogi(los.allcode.length,los.codes.length);
         los = JSON.parse(localStorage.getItem(userid));
         getSummaryInfo(userid, los.detail);
         return;
@@ -26,9 +26,13 @@ $(document).ready(function () {
                     setTimeout(() => {
                         getMatchDetailList(userid, param)
                             .done(function (result) {
-                                if (result != null) {
+                                if (result.code !== -301) {
                                     resolve(md[k] = result.data);
                                     resolve(mc[k] = matchList[k]);
+                                } else {
+                                    resolve(null);
+                                    matchList[k] = null;
+                                    $(`#id-finderror`).append(`<p>[-301] 비정상적인 순위경기 제외됨</p>`);
                                 }
                             });
                     }, 3);
@@ -41,19 +45,21 @@ $(document).ready(function () {
             }
 
             parallel(getMatch).then(val => {
-                let value = val;
+                let value = val.filter(v => v !== null);
+                let matchCodes = mc.filter(v=>v!==null);
+                let ml = matchList.filter(v=>v!==null);
                 for (let k = 0; k < value.length; k++) {
                     getViewMatches(value[k], k);
                 }
                 let matches = {
                     detail: value,
-                    codes: mc,
+                    codes: matchCodes,
                     timestamp: new Date().getTime(),
-                    allcode: matchList
+                    allcode: ml
                 }
                 deleteFromLocal();
                 localStorage.setItem(userid, JSON.stringify(matches));
-                postDerBogi(matchList.length);
+                postDerBogi(ml.length , matchCodes.length);
                 getSummaryInfo(userid, JSON.parse(localStorage.getItem(userid)).detail);
             });
         })
@@ -283,11 +289,7 @@ function getMatchCodeList(userid) {
 function getMatchDetailList(userid, usermatchCode) {
     return $.ajax({
         type: 'GET',
-        url: `/users/${userid}/matches?mc=${usermatchCode}`,
-        error: function () {
-            $(`#id-finderror`).append('<p>[-301]비정상적인 순위경기 식별</p>');
-            return null;
-        }
+        url: `/users/${userid}/matches?mc=${usermatchCode}`
     });
 }
 
@@ -318,22 +320,26 @@ function getMoreMatch(id) {
             setTimeout(() => {
                 getMatchDetailList(id, newMatchList[k])
                     .done(function (result) {
-                        if (result != null) {
+                        if (result.code !== -301) {
                             resolve(result.data);
+                        }
+                        else{
+                            resolve(null);
+                            $(`#id-finderror`).append(`<p class="clas">[-301] 비정상적인 순위경기 제외됨</p>`);
                         }
                     });
             }, 3);
         });
     }
-
     async function paral(matches) {
         const result = matches.map((param, k) => asyncMoreMatches(param, k));
         return await Promise.all(result);
     }
 
     paral(newMatchList).then(value => {
-        for (let k = 0; k < value.length; k++) {
-            getViewMatches(value[k], index + k);
+        let val = value.filter(v=>v!==null);
+        for (let k = 0; k < val.length; k++) {
+            getViewMatches(val[k], index + k);
         }
     });
     if (matchCodeList.length <= index + 5) {
@@ -358,8 +364,8 @@ function getGangsin(id) {
     window.location.reload();
 }
 
-function postDerBogi(len) {
-    if (len > 10) {
+function postDerBogi(len ,cur) {
+    if (len > cur) {
         $('#id-derbogi').show();
     }
 }
@@ -1131,7 +1137,7 @@ function getPossChart(k, myPo, yourPo, myname, yourname) {
 }
 
 function getShootChart(k, shootDtoList, myname, yourname) {
-    let dtos = [shootDtoList[0].map(v => [(v['x']), v['y']]),shootDtoList[1].map(v => [1-(v['x']), v['y']])];
+    let dtos = [shootDtoList[0].map(v => [(v['x']), v['y']]), shootDtoList[1].map(v => [1 - (v['x']), v['y']])];
     let type = ['', '일반적인 슈팅', '정교한 슈팅', '헤더'];
     let result = ['', '유효슈팅', '벗어나는 슈팅', '득점', '골대맞음'];
     var options = {
@@ -1158,25 +1164,25 @@ function getShootChart(k, shootDtoList, myname, yourname) {
             events: {
                 dataPointSelection: (event, chartContext, config) => {
                     let who = config.seriesIndex;
-                    if(who>=2){
+                    if (who >= 2) {
                         return;
                     }
                     let info = config.w.config.series[who].data[config.dataPointIndex];
-                    let dto = shootDtoList[who].filter(it=>(it.x===info[0]||it.x===(1-info[0])) && it.y===info[1] && it.assist===true);
-                    if(dto.length!==0){
-                            config.w.config.series[2] = {
-                                name: '어시스트',
-                                data: [[info[0],info[1]],[Math.abs(who-dto[0].assistX),dto[0].assistY]]
-                            }
-                            chart.updateSeries(config.w.config.series);
+                    let dto = shootDtoList[who].filter(it => (it.x === info[0] || it.x === (1 - info[0])) && it.y === info[1] && it.assist === true);
+                    if (dto.length !== 0) {
+                        config.w.config.series[2] = {
+                            name: '어시스트',
+                            data: [[info[0], info[1]], [Math.abs(who - dto[0].assistX), dto[0].assistY]]
+                        }
+                        chart.updateSeries(config.w.config.series);
                     }
                 }
             }
         },
         fill: {
-            type: ['solid' , 'solid'],
+            type: ['solid', 'solid'],
         },
-        colors: ['#ff0000','#ffff00','#00FF00'],
+        colors: ['#ff0000', '#ffff00', '#00FF00'],
         markers: {
             enabled: true,
             strokeWidth: 0.1,
@@ -1192,7 +1198,7 @@ function getShootChart(k, shootDtoList, myname, yourname) {
             labels: {
                 show: false
             },
-            axisBorder:{
+            axisBorder: {
                 show: false
             },
             axisTicks: {
@@ -1231,7 +1237,7 @@ function getShootChart(k, shootDtoList, myname, yourname) {
             enabled: true,
             shared: false,
             intersect: true,
-            enabledOnSeries: [0,1],
+            enabledOnSeries: [0, 1],
             x: {
                 show: true,
                 formatter: function (series, value) {
@@ -1246,7 +1252,7 @@ function getShootChart(k, shootDtoList, myname, yourname) {
                     let x = curData.x;
                     let gType = type[curData.type];
                     return ['좌표(' + Math.round(x * 100) / 100 + ','
-                    + Math.round(series * 100) / 100 + ')\n'+gType];
+                    + Math.round(series * 100) / 100 + ')\n' + gType];
                 }
             }
         },
@@ -1277,7 +1283,7 @@ function getShootChart(k, shootDtoList, myname, yourname) {
             }
         ]
     }
-    if(isMobile()){
+    if (isMobile()) {
         $(`#shoot-all-warn-${k}`).text("현재 기기에서는 어시스트 경로 확인이 제한됩니다.")
         options.chart.events.dataPointSelection = undefined;
     }
