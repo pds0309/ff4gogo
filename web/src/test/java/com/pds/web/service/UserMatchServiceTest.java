@@ -6,6 +6,7 @@ import com.pds.web.api.MatchDto;
 import com.pds.web.api.MatchFinder;
 import com.pds.web.exception.ErrorInfo;
 import com.pds.web.exception.UserRequestException;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,17 +53,15 @@ class UserMatchServiceTest {
         objects.add(TestMatchDetail.matchList.get(1));
         given(matchFinder.getDetailMatchJsonListFromCodeList("CODE","ID"))
                 .willReturn(objects);
-        Exception e = assertThrows(UserRequestException.class ,
-                ()->matchService.getDetailMatchList("CODE","ID"));
-        assertEquals(ErrorInfo.FF4_API_ERROR.getErrorMsg() , e.getMessage());
-
+        assertNull(matchService.getDetailMatchList("CODE","ID"));
     }
     @Test
     void getDetailMatchNullTest(){
         given(matchFinder.getDetailMatchJsonListFromCodeList("CODE","ID"))
-                .willReturn(null);
-        Exception e = assertThrows(UserRequestException.class ,
-                ()->matchService.getDetailMatchList("CODE","ID"));
-        assertEquals(ErrorInfo.FF4_API_ERROR.getErrorMsg() , e.getMessage());
+                .willThrow(new JSONException(""));
+        assertNull(matchService.getDetailMatchList("CODE", "ID"));
+        given(matchFinder.getDetailMatchJsonListFromCodeList("CODE2","ID2"))
+                .willThrow(new NullPointerException());
+        assertNull(matchService.getDetailMatchList("CODE2", "ID2"));
     }
 }
