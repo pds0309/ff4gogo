@@ -29,7 +29,7 @@ public class UserMatchService {
                     MatchDeliver.playerInfo(objects),
                     MatchDeliver.shootInfo(objects));
         } catch (JSONException | NullPointerException e) {
-            throw new UserRequestException(ErrorInfo.FF4_API_ERROR);
+            return null;
         }
     }
 }

@@ -60,14 +60,15 @@ class UserMatchControllerTest {
 
     }
     @Test
-    void getDetailFromMatchCodeExceptionTest() throws Exception{
+    void getDetailFromMatchCodeNullTest() throws Exception{
         given(matchService.getDetailMatchList("CODE","ID"))
                 //cover JSONException , NullPointerException
-                .willThrow(new UserRequestException(ErrorInfo.FF4_API_ERROR));
+                .willReturn(null);
         MvcResult result = mvc.perform(get("/users/{id}/matches","ID")
         .param("mc","CODE"))
-                .andExpect(status().isBadRequest()).andReturn();
-        assertEquals(ErrorInfo.FF4_API_ERROR.getErrorMsg(),result.getResolvedException().getMessage());
+                .andExpect(status().isOk()).andReturn();
+        JSONObject res = new JSONObject(result.getResponse().getContentAsString());
+        assertEquals(ErrorInfo.FF4_API_ERROR.getErrorCode(),res.getInt("code"));
     }
     @Test
     void getDetailFromMatchCodeMissingParamExceptionTest() throws Exception {
