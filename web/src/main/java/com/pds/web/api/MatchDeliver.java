@@ -41,9 +41,10 @@ public final class MatchDeliver {
         return shootDtoList;
     }
     static int calGoalTime(int time){
+        int[] timeArray = {0,45,90,105};
         int realTime = 0;
         if (time >= 16777220) {
-            realTime = (time - 16777220) / 60 + 45;
+            realTime = (time % 16777220) / 60 + (timeArray[time/16777220]);
         } else {
             realTime = time / 60;
         }
