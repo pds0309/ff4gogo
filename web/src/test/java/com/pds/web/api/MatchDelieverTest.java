@@ -71,6 +71,14 @@ class MatchDelieverTest {
 
         int time2 = 245;
         assertEquals(4 , MatchDeliver.calGoalTime(time2));
+
+        int time3 = 33555462;
+
+        assertEquals(107 , MatchDeliver.calGoalTime(time3));
+
+        int time4 = 50331953;
+
+        assertEquals(109 , MatchDeliver.calGoalTime(time4));
     }
 
 }
