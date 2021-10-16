@@ -1,9 +1,9 @@
-package com.pds.common.api;
+package com.pds.openapi.api;
 
 
-import com.pds.common.dto.UsersDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 
@@ -35,11 +35,14 @@ public class UserApiDataCollection {
         return matchCode.stream().map(matchApi::getUserMatchDetail).collect(Collectors.toList());
     }
 
-
-    public UsersDto.UserApiResponse getUserInfo(String name){
-        return userApi.fromJSONtoUser(userApi.getUserInfo(name));
+    public JSONObject getUserInfo(String name){
+        try {
+            String res = userApi.getUserInfo(name);
+            return (res!=null)? new JSONObject(res) : null;
+        } catch (JSONException e) {
+            return null;
+        }
     }
-
     public int getUserRank(String userId){
         return userApi.fromJSONtoUserRank(userApi.getRankFromUserId(userId));
     }

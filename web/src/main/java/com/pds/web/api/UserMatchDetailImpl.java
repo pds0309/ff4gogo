@@ -1,6 +1,6 @@
 package com.pds.web.api;
 
-import com.pds.common.api.WhoseMatchDetail;
+import com.pds.openapi.api.WhoseMatchDetail;
 import com.pds.web.exception.ErrorInfo;
 import com.pds.web.exception.UserRequestException;
 import lombok.extern.log4j.Log4j2;

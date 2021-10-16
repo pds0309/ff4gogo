@@ -1,4 +1,4 @@
-package com.pds.common.api;
+package com.pds.openapi.api;
 
 
 import lombok.RequiredArgsConstructor;

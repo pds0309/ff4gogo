@@ -1,6 +1,7 @@
-package com.pds.common.config;
+package com.pds.openapi.config;
 
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,6 @@ class Fifa4ApiTest {
 
     @Test
     void fifa4ApiTest() {
-        assertEquals(fifa4Api.restTemplate(), restTemplate);
+        Assertions.assertEquals(fifa4Api.restTemplate(), restTemplate);
     }
 }

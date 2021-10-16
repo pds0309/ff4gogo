@@ -1,8 +1,8 @@
 package com.pds.schedule.api;
 
 
-import com.pds.common.api.UserApiDataCollection;
-import com.pds.common.api.WhoseMatchDetail;
+import com.pds.openapi.api.UserApiDataCollection;
+import com.pds.openapi.api.WhoseMatchDetail;
 import com.pds.schedule.TestMatchDetail;
 
 import org.json.JSONObject;
