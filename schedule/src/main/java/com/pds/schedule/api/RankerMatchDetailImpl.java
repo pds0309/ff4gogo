@@ -1,7 +1,7 @@
 package com.pds.schedule.api;
 
 
-import com.pds.common.api.WhoseMatchDetail;
+import com.pds.openapi.api.WhoseMatchDetail;
 import lombok.extern.log4j.Log4j2;
 import org.json.JSONArray;
 import org.json.JSONException;

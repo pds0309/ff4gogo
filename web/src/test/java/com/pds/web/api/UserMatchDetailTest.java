@@ -1,7 +1,7 @@
 package com.pds.web.api;
 
 
-import com.pds.common.api.WhoseMatchDetail;
+import com.pds.openapi.api.WhoseMatchDetail;
 import com.pds.web.TestMatchDetail;
 import com.pds.web.exception.ErrorInfo;
 import com.pds.web.exception.UserRequestException;

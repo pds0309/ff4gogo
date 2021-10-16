@@ -1,4 +1,4 @@
-package com.pds.common.config;
+package com.pds.openapi.config;
 
 
 import lombok.Getter;
@@ -13,7 +13,7 @@ import org.springframework.web.client.RestTemplate;
 @Getter
 @Configuration
 @Log4j2
-@ComponentScan(basePackages = {"com.pds.common.config"})
+@ComponentScan(basePackages = {"com.pds.openapi.config"})
 public class Fifa4Api {
     public Fifa4Api(){
         //Do Nothing

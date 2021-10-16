@@ -37,4 +37,4 @@ out/
 .vscode/
 
 
-common/src/main/resources/application-apikey.properties
+openapi/src/main/resources/application-apikey.properties
