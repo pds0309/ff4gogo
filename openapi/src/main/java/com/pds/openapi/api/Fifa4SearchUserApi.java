@@ -1,6 +1,5 @@
-package com.pds.common.api;
+package com.pds.openapi.api;
 
-import com.pds.common.dto.UsersDto;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -31,15 +30,15 @@ public class Fifa4SearchUserApi {
         }
     }
 
-    public UsersDto.UserApiResponse fromJSONtoUser(String result){
-        try{
-            UsersDto.UserApiResponse userDto = (result!=null)? new UsersDto.UserApiResponse(new JSONObject(result)) : null;
-            return userDto;
-        }
-        catch(JSONException e){
-            return null;
-        }
-    }
+//    public UsersDto.UserApiResponse fromJSONtoUser(String result){
+//        try{
+//            UsersDto.UserApiResponse userDto = (result!=null)? new UsersDto.UserApiResponse(new JSONObject(result)) : null;
+//            return userDto;
+//        }
+//        catch(JSONException e){
+//            return null;
+//        }
+//    }
 
 
     // 유저 아이디로 랭크 정보를 얻기

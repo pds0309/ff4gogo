@@ -1,8 +1,7 @@
-package com.pds.common.api;
+package com.pds.openapi.api;
 
 
 import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 
