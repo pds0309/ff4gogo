@@ -423,7 +423,6 @@ function getSummaryInfo(userid, dtos) {
     getGoalBar(goal, dtos.length);
     getWdlDonut(wdl, dtos.length);
     getGoalTimeBar(goalTimes1[0].sort(), goalTimes1[1].sort());
-    console.log(goalTimes1);
     getMvps(myplayers, userid);
     if (idx === 0) {
         return;
@@ -437,7 +436,6 @@ function getSummaryInfo(userid, dtos) {
 }
 
 function decideGoalTime(goalTime) {
-    console.log(goalTime);
     let goals = [0, 0, 0, 0, 0, 0, 0, 0];
     for (let i = 0; i < goalTime.length; i++) {
         if (goalTime[i] < 0) {
@@ -476,9 +474,6 @@ function decideGoalTime(goalTime) {
 function getGoalTimeBar(myGoaltime, yourGoaltime) {
     let mygoals = decideGoalTime(myGoaltime);
     let yourgoals = decideGoalTime(yourGoaltime);
-    console.log(mygoals);
-    console.log(yourgoals);
-
     var options = {
         series: [{
             name: '득점',
