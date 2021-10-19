@@ -1,4 +1,4 @@
-package com.pds.common.config;
+package com.pds.openapi.config;
 
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;

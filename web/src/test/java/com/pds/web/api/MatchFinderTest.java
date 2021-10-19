@@ -1,8 +1,8 @@
 package com.pds.web.api;
 
 
-import com.pds.common.api.UserApiDataCollection;
-import com.pds.common.api.WhoseMatchDetail;
+import com.pds.openapi.api.UserApiDataCollection;
+import com.pds.openapi.api.WhoseMatchDetail;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
