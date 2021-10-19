@@ -47,6 +47,7 @@ public final class MatchDeliver {
             realTime = (time % 16777220) / 60 + (timeArray[time/16777220]);
         } else {
             realTime = time / 60;
+            if(realTime>45){realTime = -realTime;}
         }
         return realTime;
     }

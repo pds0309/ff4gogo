@@ -9,7 +9,7 @@ $(document).ready(function () {
         }
         let gangsined = los.timestamp;
         postGangsin(gangsined);
-        postDerBogi(los.allcode.length,los.codes.length);
+        postDerBogi(los.allcode.length, los.codes.length);
         los = JSON.parse(localStorage.getItem(userid));
         getSummaryInfo(userid, los.detail);
         return;
@@ -46,8 +46,8 @@ $(document).ready(function () {
 
             parallel(getMatch).then(val => {
                 let value = val.filter(v => v !== null);
-                let matchCodes = mc.filter(v=>v!==null);
-                let ml = matchList.filter(v=>v!==null);
+                let matchCodes = mc.filter(v => v !== null);
+                let ml = matchList.filter(v => v !== null);
                 for (let k = 0; k < value.length; k++) {
                     getViewMatches(value[k], k);
                 }
@@ -59,7 +59,7 @@ $(document).ready(function () {
                 }
                 deleteFromLocal();
                 localStorage.setItem(userid, JSON.stringify(matches));
-                postDerBogi(ml.length , matchCodes.length);
+                postDerBogi(ml.length, matchCodes.length);
                 getSummaryInfo(userid, JSON.parse(localStorage.getItem(userid)).detail);
             });
         })
@@ -235,8 +235,10 @@ function getOneMatchInfo(dto, k) {
 function putGoalInfo(shootDto, k, idx) {
     for (let obj of shootDto) {
         if (obj.result === 3) {
+            let gt = obj.goalTime;
+            gt = (gt >= 0 ) ? gt : '45+'+(-gt - 45);
             $(`#match-goals-${k}-${idx}`).append(`
-            <small><i class="fa fa-futbol"></i>&nbsp;${obj.goalTime}'<span class="get-${obj.spId}-name"></span></small><br>`);
+            <small><i class="fa fa-futbol"></i>&nbsp;${gt}'<span class="get-${obj.spId}-name"></span></small><br>`);
         }
     }
 }
@@ -322,8 +324,7 @@ function getMoreMatch(id) {
                     .done(function (result) {
                         if (result.code !== -301) {
                             resolve(result.data);
-                        }
-                        else{
+                        } else {
                             resolve(null);
                             $(`#id-finderror`).append(`<p class="clas">[-301] 비정상적인 순위경기 제외됨</p>`);
                         }
@@ -331,13 +332,14 @@ function getMoreMatch(id) {
             }, 3);
         });
     }
+
     async function paral(matches) {
         const result = matches.map((param, k) => asyncMoreMatches(param, k));
         return await Promise.all(result);
     }
 
     paral(newMatchList).then(value => {
-        let val = value.filter(v=>v!==null);
+        let val = value.filter(v => v !== null);
         for (let k = 0; k < val.length; k++) {
             getViewMatches(val[k], index + k);
         }
@@ -364,7 +366,7 @@ function getGangsin(id) {
     window.location.reload();
 }
 
-function postDerBogi(len ,cur) {
+function postDerBogi(len, cur) {
     if (len > cur) {
         $('#id-derbogi').show();
     }
@@ -381,6 +383,7 @@ function getSummaryInfo(userid, dtos) {
     let mypassDto = [];
     let yourpassDto = [];
     let dribbles = [0, 0];
+    let goalTimes1 = [[], []];
     for (let dto of dtos) {
         let result = dto.basicDtoList[0].matchResult;
         if (result === "승") {
@@ -412,9 +415,15 @@ function getSummaryInfo(userid, dtos) {
         yourpassDto.push(dto.passDtoList[1]);
         goal[0] += dto.basicDtoList[0].goalTotal;
         goal[1] += dto.basicDtoList[1].goalTotal;
+        let myShoots = dto.shootDtoList[0].filter(g => g.result === 3);
+        let yourShoots = dto.shootDtoList[1].filter(g => g.result === 3);
+        goalTimes1[0] = goalTimes1[0].concat(myShoots.map(value => value.goalTime));
+        goalTimes1[1] = goalTimes1[1].concat(yourShoots.map(value => value.goalTime));
     }
     getGoalBar(goal, dtos.length);
     getWdlDonut(wdl, dtos.length);
+    getGoalTimeBar(goalTimes1[0].sort(), goalTimes1[1].sort());
+    console.log(goalTimes1);
     getMvps(myplayers, userid);
     if (idx === 0) {
         return;
@@ -425,6 +434,119 @@ function getSummaryInfo(userid, dtos) {
     getAnalSummary(poss, shoots1, shoots2, idx, goal, dribbles);
     getAnalPass(myPass, idx, [0, 1, 2], "성공");
     getAnalPass(yourPass, idx, [2, 1, 0], "허용");
+}
+
+function decideGoalTime(goalTime) {
+    console.log(goalTime);
+    let goals = [0, 0, 0, 0, 0, 0, 0, 0];
+    for (let i = 0; i < goalTime.length; i++) {
+        if (goalTime[i] < 0) {
+            goals[3]++;
+            continue;
+        }
+        if (goalTime[i] < 15) {
+            goals[0]++;
+            continue;
+        }
+        if (goalTime[i] < 30) {
+            goals[1]++;
+            continue;
+        }
+        if (goalTime[i] < 45) {
+            goals[2]++;
+            continue;
+        }
+        if (goalTime[i] < 60) {
+            goals[4]++;
+            continue;
+        }
+        if (goalTime[i] < 75) {
+            goals[5]++;
+            continue;
+        }
+        if (goalTime[i] < 90) {
+            goals[6]++;
+            continue;
+        }
+        goals[7]++;
+    }
+    return goals;
+}
+
+function getGoalTimeBar(myGoaltime, yourGoaltime) {
+    let mygoals = decideGoalTime(myGoaltime);
+    let yourgoals = decideGoalTime(yourGoaltime);
+    console.log(mygoals);
+    console.log(yourgoals);
+
+    var options = {
+        series: [{
+            name: '득점',
+            data: mygoals
+        }, {
+            name: '실점',
+            data: yourgoals
+        }],
+        chart: {
+            type: 'bar',
+            foreColor: '#FFFFFF',
+            toolbar: {
+                show: false
+            },
+            height: 300
+        },
+        plotOptions: {
+            bar: {
+                borderRadius: 4,
+                horizontal: false,
+                columnWidth: '55%',
+                endingShape: 'rounded'
+            },
+        },
+        dataLabels: {
+            enabled: false
+        },
+        colors: ['#468af6', '#de5d5d'],
+        stroke: {
+            show: true,
+            width: 2,
+            colors: ['transparent']
+        },
+        xaxis: {
+            categories: ['0-15', '15-30', '30-45', '45++', '45-60', '60-75', '75-90', '90++'],
+        },
+        yaxis: {
+            labels: {
+                show: false
+            }
+        },
+        grid: {
+            show: false
+        },
+        fill: {
+            opacity: 1
+        },
+        tooltip: {
+            theme: 'dark',
+            x: {
+                show: true
+            },
+            y: {
+                title: {
+                    formatter: function () {
+                        return '';
+                    }
+                }
+            }
+        },
+        title: {
+            text: `득/실 시간분포`,
+            align: 'center'
+        }
+    };
+
+    var chart = new ApexCharts(document.querySelector("#basic-gtime-chart"), options);
+    chart.render();
 }
 
 function getAnalPass(passList, idx, arr, msg) {
@@ -542,7 +664,7 @@ function getWdlDonut(wdl, len) {
         series: wdl,
         chart: {
             type: 'donut',
-            height: 300,
+            height: 350,
             foreColor: '#FFFFFF',
             toolbar: {
                 show: false
@@ -554,7 +676,7 @@ function getWdlDonut(wdl, len) {
             align: 'center'
         },
         legend: {
-            position: 'right',
+            position: 'bottom',
             onItemClick: {
                 toggleDataSeries: true
             },
@@ -694,7 +816,7 @@ function dtoReducer(keys, obj) {
 
 function sortDto(dto, key) {
     return dto.sort(function (o1, o2) {
-        return o1[key] - o2[key]
+        return Math.abs(o1[key]) - Math.abs(o2[key])
     });
 }
 
@@ -895,7 +1017,7 @@ function getMatchHorBar(k, idx, summaryDtoList, keys, myname, yourname) {
             }
         },
         xaxis: {
-            categories: ['슈팅', '유효슈팅', '코너킥 ', '프리킥 ', '옵사', '파울', '자책골 ', '경고', '퇴장'
+            categories: ['슈팅', '유효슛 ', '코너킥 ', '프리킥 ', '옵사', '파울', '자책골 ', '경고', '퇴장'
             ],
             labels: {
                 show: false
@@ -932,7 +1054,7 @@ function getMatchHorBar(k, idx, summaryDtoList, keys, myname, yourname) {
                         }
                     },
                     chart: {
-                        height: 360
+                        height: 380
                     }
                 }
             }
@@ -1242,7 +1364,8 @@ function getShootChart(k, shootDtoList, myname, yourname) {
                 show: true,
                 formatter: function (series, value) {
                     let curData = shootDtoList[value['seriesIndex']][value['dataPointIndex']];
-                    return [curData.goalTime + '` ' + $(`.get-${curData.spId}-name`)[0].innerText + '\n' + ((curData.hitPost) ? result[4] : result[curData.result])];
+                    let gt = (curData.goalTime >= 0) ? curData.goalTime : "45+" + (-curData.goalTime - 45);
+                    return [gt + '` ' + $(`.get-${curData.spId}-name`)[0].innerText + '\n' + ((curData.hitPost) ? result[4] : result[curData.result])];
                 }
             },
             y: {
