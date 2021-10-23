@@ -1,22 +1,8 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta property="og:title" content="피온4고고" />
-    <meta property="og:description" content="피파온라인4 순위경기 전적조회" />
-    <title>피온4 고고</title>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;800&display=swap" rel="stylesheet">
-    <script src="https://kit.fontawesome.com/15181efa86.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="/css/bulma.css">
-    <link rel="stylesheet" href="/css/main.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.js"
-            integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
-            crossorigin="anonymous"></script>
-    <script src="/js/search.js"></script>
-    <script src="/js/ind.js"></script>
+<head th:include="/header::Head">
 </head>
+<script src="/js/ind.js"></script>
 <body>
 <section id="id-index-title" class="hero is-medium has-text-centered">
     <div class="hero-body">
