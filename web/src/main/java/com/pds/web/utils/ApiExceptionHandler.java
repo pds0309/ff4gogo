@@ -10,6 +10,7 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.ModelAndView;
 
 
@@ -31,6 +32,14 @@ public class ApiExceptionHandler{
 
     @ExceptionHandler(value = {MissingServletRequestParameterException.class})
     public ResponseEntity<Object> handleMissParamException(MissingServletRequestParameterException e, HttpServletRequest request) {
+        basicLogs(request);
+        simpleExceptionLog(e);
+        ErrorInfo paramError = ErrorInfo.PARAMETER_INVALID;
+        return ResponseHandler.generateResponse(
+                paramError.getErrorMsg(), paramError.getErrorCode(), HttpStatus.BAD_REQUEST, null, request.getRequestURI());
+    }
+    @ExceptionHandler(value = {MethodArgumentTypeMismatchException.class})
+    public ResponseEntity<Object> handleMissParamException(MethodArgumentTypeMismatchException e, HttpServletRequest request) {
         basicLogs(request);
         simpleExceptionLog(e);
         ErrorInfo paramError = ErrorInfo.PARAMETER_INVALID;

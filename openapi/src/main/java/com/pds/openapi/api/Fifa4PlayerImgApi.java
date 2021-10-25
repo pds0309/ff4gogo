@@ -27,10 +27,8 @@ public final class Fifa4PlayerImgApi {
             String url2 = "https://fo4.dn.nexoncdn.co.kr/live/externalAssets/common/players/p" + code + ".png";
             return (hasImage(new URL(url2))) ? url2 : DEFAULT_IMAGE;
         } catch (MalformedURLException | ArithmeticException e ) {
-            e.printStackTrace();
+            return DEFAULT_IMAGE;
         }
-        return DEFAULT_IMAGE;
-
     }
     static boolean hasImage(URL obj){
         try {
