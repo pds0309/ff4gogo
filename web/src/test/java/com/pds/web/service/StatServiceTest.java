@@ -41,15 +41,15 @@ class StatServiceTest {
         statList.add(new Stat(
                 new StatId(
                         new Player(101123,"김갑환",new Season(101,"","","")),202109),
-                5,5,5,15,5));
+                5,5,5,15,5,"","ST"));
         statList.add(new Stat(
                 new StatId(
                         new Player(201125,"최번개",new Season(201,"","","")),202108),
-                2,1,3,15,4));
+                2,1,3,15,4,"","ST"));
         statList.add(new Stat(
                 new StatId(
                         new Player(301124,"장거한",new Season(301,"","","")),202109),
-                2,1,3,2,15));
+                2,1,3,2,15,"","ST"));
     }
 
     @Test

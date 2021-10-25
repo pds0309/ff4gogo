@@ -28,7 +28,7 @@ public class RankerMatchFinder {
     private WhoseMatchDetail<List<JSONObject>> matchDetail;
 
     public List<String> getRankerIdList() {
-        List<String> rankerNameList = RankerScrapper.getRankerListFromWeb(9);
+        List<String> rankerNameList = RankerScrapper.getRankerListFromWeb(18);
         List<String> rankerIdList = new ArrayList<>();
         for (String s : rankerNameList) {
             JSONObject jsonObject = userApiDataCollection.getUserInfo(s);
@@ -42,7 +42,7 @@ public class RankerMatchFinder {
     public Map<String, List<String>> getRankersMatchCodeMap(List<String> rankerIdList) {
         Map<String, List<String>> rankerMatchMap = new HashMap<>();
         for (String s : rankerIdList) {
-            rankerMatchMap.put(s, userApiDataCollection.getUserMatchesFromApi(s, 20));
+            rankerMatchMap.put(s, userApiDataCollection.getUserMatchesFromApi(s, 10));
         }
         return rankerMatchMap;
     }

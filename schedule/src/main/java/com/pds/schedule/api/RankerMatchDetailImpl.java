@@ -46,7 +46,8 @@ public class RankerMatchDetailImpl implements WhoseMatchDetail<List<JSONObject>>
                                 .put("cnt", 1)
                                 .put("win", (matchResult.equals("승") ? 1 : 0))
                                 .put("pId", pId)
-                                .put("statId", matchSeasonId));
+                                .put("statId", matchSeasonId)
+                                .put("spPosition",pos));
                     }
                 }
             } catch (JSONException ignored) {
