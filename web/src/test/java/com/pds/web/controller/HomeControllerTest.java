@@ -8,6 +8,7 @@ import com.pds.common.entity.Player;
 import com.pds.common.entity.Season;
 import com.pds.common.entity.Stat;
 import com.pds.common.entity.StatId;
+import com.pds.web.TestMatchDetail;
 import com.pds.web.service.StatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,11 +59,11 @@ class HomeControllerTest {
         statDtoList.add(new StatDto.Info(
                 new StatDto.StatIdDto(
                         new PlayerDto.Info(101123, "김갑환", new SeasonDto(101, "", "", "")), 202109),
-                5, 5, 5, 15, 5));
+                5, 5, 5, 15, 5, TestMatchDetail.posForStat , "CF"));
         statDtoList.add(new StatDto.Info(
                 new StatDto.StatIdDto(
                         new PlayerDto.Info(101124, "최번개", new SeasonDto(101, "", "", "")), 202108),
-                5, 5, 5, 15, 5));
+                5, 5, 5, 15, 5 , TestMatchDetail.posForStat , "CF"));
     }
 
 

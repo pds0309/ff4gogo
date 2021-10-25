@@ -13,7 +13,7 @@ public class PlayerSchedule {
 
     private final PlayerUpdate playerUpdate;
 
-    @Scheduled(cron = "0 4 0 * * FRI")
+    @Scheduled(cron = "0 1 0 * * FRI")
     public void cronPlayers(){
         playerUpdate.updateSeason();
         playerUpdate.updatePlayers(playerUpdate.getNewPlayerList());
