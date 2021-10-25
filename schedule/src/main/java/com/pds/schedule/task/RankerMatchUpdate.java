@@ -37,16 +37,18 @@ public class RankerMatchUpdate {
         List<StatDto.StatBodyDto> bodyDtoList = new ArrayList<>();
         List<StatDto.StatIdDto> idDtoList = new ArrayList<>();
         List<Stat> statList = new ArrayList<>();
-        for (int i = 0; i < recentMatchList.size(); i++) {
-            Optional<Player> player = playerRepository.findById(recentMatchList.get(i).getInt("pId"));
+        int j = 0;
+        for (JSONObject jsonObject : recentMatchList) {
+            Optional<Player> player = playerRepository.findById(jsonObject.getInt("pId"));
             if (player.isPresent()) {
                 idDtoList.add(
                         new StatDto.StatIdDto((PlayerDto.Info) modelMapper.entityToDto(player.get(), PlayerDto.Info.class),
-                                recentMatchList.get(i).getInt("statId")));
-                bodyDtoList.add(StatDto.StatBodyDto.builder(recentMatchList.get(i)).build());
+                                jsonObject.getInt("statId")));
+                bodyDtoList.add(StatDto.StatBodyDto.builder(jsonObject).build());
                 statList.add(
-                        new Stat((StatId) modelMapper.dtoToEntity(idDtoList.get(i), StatId.class),
-                                bodyDtoList.get(i)));
+                        new Stat((StatId) modelMapper.dtoToEntity(idDtoList.get(j), StatId.class),
+                                bodyDtoList.get(j)));
+                j++;
             }
         }
         return statList;
