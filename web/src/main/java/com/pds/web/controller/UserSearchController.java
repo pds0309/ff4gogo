@@ -26,7 +26,7 @@ public class UserSearchController {
     @ResponseBody
     public ResponseEntity<UsersDto.Info> saveUser(@RequestBody(required = false) String nn) {
         log.info(nn + "으로 접근 시도됨");
-        return ResponseHandler.generateResponse("유저 등록 성공",HttpStatus.OK , userSearchService.createUser(userSearchService.findUser(nn)));
+        return ResponseHandler.generateResponse("유저 등록 성공",HttpStatus.CREATED , userSearchService.createUser(userSearchService.findUser(nn)));
     }
 
     @GetMapping("/users/{id}")
@@ -48,6 +48,6 @@ public class UserSearchController {
     @ResponseBody
     public ResponseEntity<List<String>> saveUserMatches(@PathVariable String id){
         return ResponseHandler.generateResponse("유저 매치리스트 수집 성공",
-                HttpStatus.OK, userSearchService.getMatchListFirstTime(id));
+                HttpStatus.CREATED, userSearchService.getMatchListFirstTime(id));
     }
 }

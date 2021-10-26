@@ -6,6 +6,7 @@ import com.pds.web.exception.UserRequestException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -30,8 +31,8 @@ public class ApiExceptionHandler{
                 e.getMessage(), e.getCode(), HttpStatus.BAD_REQUEST, null, request.getRequestURI());
     }
 
-    @ExceptionHandler(value = {MissingServletRequestParameterException.class})
-    public ResponseEntity<Object> handleMissParamException(MissingServletRequestParameterException e, HttpServletRequest request) {
+    @ExceptionHandler(value = {MissingServletRequestParameterException.class , HttpMessageNotReadableException.class})
+    public ResponseEntity<Object> handleMissParamException(Exception e, HttpServletRequest request) {
         basicLogs(request);
         simpleExceptionLog(e);
         ErrorInfo paramError = ErrorInfo.PARAMETER_INVALID;

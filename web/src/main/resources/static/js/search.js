@@ -49,7 +49,7 @@ function sendErrorAlert(response) {
 function getPlayerInfo(playerid) {
     return $.ajax({
         type: 'GET',
-        url: `/players?pid=${playerid}`
+        url: `/players/info?pid=${playerid}`
     });
 }
 

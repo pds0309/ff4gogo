@@ -65,7 +65,7 @@ class UserSearchControllerTest {
                 .willReturn(infoDto);
         MockHttpServletResponse response = mvc.perform(post("/users").content("NAME")
                 .accept(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isOk())
+        ).andExpect(status().isCreated())
                 .andReturn().getResponse();
 
         JSONObject resultObj = new JSONObject(response.getContentAsString());
@@ -146,7 +146,7 @@ class UserSearchControllerTest {
         given(userSearchService.getMatchListFirstTime("ID"))
                 .willReturn(matchCodeList);
         mvc.perform(post("/users/{id}/matches", "ID"))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andReturn();
     }
     @Test
