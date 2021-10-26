@@ -290,8 +290,10 @@ function getMatchCodeList(userid) {
 
 function getMatchDetailList(userid, usermatchCode) {
     return $.ajax({
-        type: 'GET',
-        url: `/users/${userid}/matches?mc=${usermatchCode}`
+        type: 'PUT',
+        url: `/users/${userid}/matches`,
+        contentType: "application/json",
+        data: usermatchCode
     });
 }
 
