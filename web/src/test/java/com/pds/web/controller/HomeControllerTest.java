@@ -108,7 +108,7 @@ class HomeControllerTest {
         int thisSeason = 202109;
         int cnt = 3;
         given(statService.getBest11Players(thisSeason, cnt)).willReturn(statDtoList);
-        MvcResult mvcResult = mvc.perform(get("/best11")
+        MvcResult mvcResult = mvc.perform(get("/stats/bestpos")
                 .param("cnt", String.valueOf(cnt))
                 .param("season", String.valueOf(thisSeason)))
                 .andExpect(status().isOk())
@@ -120,10 +120,10 @@ class HomeControllerTest {
     @Test
     void getHomeBest11NoDataTest() throws Exception {
         given(statService.getBest11Players(1, 1)).willReturn(new ArrayList<>());
-        MvcResult mvcResult = mvc.perform(get("/best11")
+        MvcResult mvcResult = mvc.perform(get("/stats/bestpos")
                 .param("cnt", String.valueOf(1))
                 .param("season", String.valueOf(1)))
-                .andExpect(status().isNoContent())
+                .andExpect(status().isNotFound())
                 .andReturn();
         assertEquals(ErrorInfo.DB_DATA_ERROR.getErrorCode(),new JSONObject(mvcResult.getResponse().getContentAsString()).getInt("code"));
     }
