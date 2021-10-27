@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @RestController
@@ -20,13 +21,13 @@ class UserMatchController {
     private final UserMatchService userMatchService;
 
     @PutMapping("/users/{id}/matches")
-    public ResponseEntity<MatchDto.Info> getDetailFromMatchCode(@PathVariable String id , @RequestBody String mc){
+    public ResponseEntity<MatchDto.Info> getDetailFromMatchCode(@PathVariable String id,@RequestBody String mc){
         MatchDto.Info result = userMatchService.getDetailMatchList(mc,id);
         if(result!=null){
             return ResponseHandler.generateResponse("상세 순위경기 조회 OK", HttpStatus.CREATED,result);
         }
         else{
-            return ResponseHandler.generateResponse(ErrorInfo.FF4_API_ERROR.getErrorMsg(),ErrorInfo.FF4_API_ERROR.getErrorCode(),HttpStatus.NO_CONTENT,result,"");
+            return ResponseEntity.noContent().header("Content-Length", "0").build();
         }
     }
     @PostMapping("/users/{id}/matches/mvp")

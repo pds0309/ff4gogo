@@ -80,11 +80,9 @@ class UserMatchControllerTest {
         given(matchService.getDetailMatchList("CODE", "ID"))
                 //cover JSONException , NullPointerException
                 .willReturn(null);
-        MvcResult result = mvc.perform(put("/users/{id}/matches", "ID")
+        mvc.perform(put("/users/{id}/matches", "ID")
                 .content("CODE"))
-                .andExpect(status().isNoContent()).andReturn();
-        JSONObject jsonObject = new JSONObject(result.getResponse().getContentAsString());
-        assertEquals(ErrorInfo.FF4_API_ERROR.getErrorCode(), jsonObject.getInt("code"));
+                .andExpect(status().isNoContent());
     }
 
     @Test

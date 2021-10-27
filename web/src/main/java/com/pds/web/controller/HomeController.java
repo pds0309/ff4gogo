@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -42,16 +43,16 @@ public class HomeController {
         return "index";
     }
 
-    @GetMapping("/best11")
+    @GetMapping("/stats/bestpos")
     @ResponseBody
     public ResponseEntity<List<StatDto .Info>> getHomeBest11(@RequestParam int cnt , @RequestParam int season){
         List<StatDto.Info> bestList = statService.getBest11Players(season,cnt);
         if(!bestList.isEmpty()){
-            return ResponseHandler.generateResponse("시즌 베스트11 선수 조회 성공", HttpStatus.OK,bestList);
+            return ResponseHandler.generateResponse("시즌 포지션별 Top 선수 조회 성공", HttpStatus.OK,bestList);
         }
         else{
             ErrorInfo errorInfo = ErrorInfo.DB_DATA_ERROR;
-            return ResponseHandler.generateResponse(errorInfo.getErrorMsg(),errorInfo.getErrorCode(), HttpStatus.NO_CONTENT,null,"/best11");
+            return ResponseHandler.generateResponse(errorInfo.getErrorMsg(),errorInfo.getErrorCode(), HttpStatus.NOT_FOUND,new ArrayList<>(),"/stats/bestpos");
         }
     }
 }
