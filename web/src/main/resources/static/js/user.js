@@ -25,14 +25,14 @@ $(document).ready(function () {
                 return new Promise((resolve, reject) => {
                     setTimeout(() => {
                         getMatchDetailList(userid, param)
-                            .done(function (result) {
-                                if (result.code !== -301) {
+                            .done(function (result,textStatus,jqXHR) {
+                                if (jqXHR.status !== 204) {
                                     resolve(md[k] = result.data);
                                     resolve(mc[k] = matchList[k]);
                                 } else {
                                     resolve(null);
                                     matchList[k] = null;
-                                    $(`#id-finderror`).append(`<p>[-301] 비정상적인 순위경기 제외됨</p>`);
+                                    $(`#id-finderror`).append(`<p>비정상적인 순위경기 제외됨</p>`);
                                 }
                             });
                     }, 3);
@@ -259,15 +259,15 @@ function putSquad(playerDto, k, idx) {
             $(`#sqd-${k}-${idx}-28`)
                 .append(`<div class="column mywidth-16">
 <figure class="image is-96x96 resp is-inline-block mt-1 is-relative">
-                        <img class="image hovsub pos-taeduri-${obj.rootPosName} get-${obj.spId}-img"  src="" alt="player">
+                        <img class="image hovsub pos-taeduri-${obj.rootPosName} get-${obj.spId}-img im-${k}-${idx}"  src="" alt="player">
                          <img class="image get-${obj.spId}-simg" style="position: absolute;bottom: 0;left: 0;width: 29%;height: 29%" src="" alt="season">
                              <img class="image" style="position: absolute;bottom: 0;right: 0;width: 29%;height: 29%" src="/img/e${obj.spGrade}.PNG">
                     </figure>
                     <p class="myp has-text-black verysmall" style="margin-top: -8px;margin-bottom: -8px;"><small id="subs-${k}-${idx}-${obj.spId}" class="get-${obj.spId}-name"></small></p>                 
                          </div>                                        
 `);
-            $(`.image.hovsub.get-${obj.spId}-img`).hover(function () {
-                $(`#mobilehovertext-name`).text($(`#subs-${k}-${idx}-${obj.spId}`).text());
+            $(`.image.hovsub.get-${obj.spId}-img.im-${k}-${idx}`).hover(function () {
+                $(`#mobilehovertext-name-${k}-${idx}`).text($(`#subs-${k}-${idx}-${obj.spId}`).text());
             });
         }
     }
@@ -290,8 +290,10 @@ function getMatchCodeList(userid) {
 
 function getMatchDetailList(userid, usermatchCode) {
     return $.ajax({
-        type: 'GET',
-        url: `/users/${userid}/matches?mc=${usermatchCode}`
+        type: 'PUT',
+        url: `/users/${userid}/matches`,
+        contentType: "application/json",
+        data: usermatchCode
     });
 }
 
@@ -321,12 +323,12 @@ function getMoreMatch(id) {
         return new Promise((resolve) => {
             setTimeout(() => {
                 getMatchDetailList(id, newMatchList[k])
-                    .done(function (result) {
-                        if (result.code !== -301) {
+                    .done(function (result,textStatus,jqXHR) {
+                        if (jqXHR.status !== 204) {
                             resolve(result.data);
                         } else {
                             resolve(null);
-                            $(`#id-finderror`).append(`<p class="clas">[-301] 비정상적인 순위경기 제외됨</p>`);
+                            $(`#id-finderror`).append(`<p class="clas">비정상적인 순위경기 제외됨</p>`);
                         }
                     });
             }, 3);
@@ -878,7 +880,7 @@ function squadHtml(k, idx) {
 <div class="has-text-centered has-text-weight-bold is-size-3-desktop is-size-5-mobile mt-1"><p>교체선수</p><hr></div>
 <div id="sqd-${k}-${idx}-28" class="columns is-mobile">
 </div>
-<p id="mobilehovertext-name" class="has-text-weight-bold">&nbsp;</p>`
+<p id="mobilehovertext-name-${k}-${idx}" class="has-text-weight-bold">&nbsp;</p>`
 }
 
 

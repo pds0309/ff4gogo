@@ -6,6 +6,7 @@
 <body>
 <section id="id-index-title" class="hero is-medium has-text-centered">
     <div class="hero-body">
+        <small style="position: absolute;top: 0;left: 0">Image By Unsplash</small>
         <div class="container">
             <h1 class="title is-0 ">피온4 고고</h1>
             <h2 class="title is-5">FIFAONLINE4 <br>순위경기 전적 조회 서비스</h2><br><br>
@@ -16,10 +17,10 @@
         </div>
     </div>
 </section>
-<section id="parallax-2" class="hero is-large">
+<section id="parallax-2" class="hero is-medium">
     <div class="hero-body">
         <div class="container">
-            <h1 class="title is-1 has-text-centered" th:text="|${thisseason} 시즌|">202109시즌</h1>
+            <h1 class="title is-1 has-text-centered" th:text="|${thisseason}-시즌|">202111-시즌</h1>
             <p class="title is-4 has-text-centered" th:text="|${matchnum} 경기 Top Players|">10563 경기 Top Player</p>
             <div class="tabs is-centered is-toggle is-toggle-rounded is-fullwidth is-justify-content-center">
                 <ul class="has-text-weight-bold column  tabs outer">
@@ -37,10 +38,7 @@
                                 <i th:if="${index.index}<=2" th:class="|fa fa-crown king-icon k-${index.index}|"></i>
                                 <figure class="card-image is-128x128">
                                     <div style="width: fit-content; display: inline-block">
-                                        <img class="is-rounded" th:with="pimg=${stat.getStatId().getPlayer().getPlayerId()}%(${stat.getStatId().getPlayer().getSeason().getId()}*10000)"
-                                             th:onerror="|this.onerror=null;this.src='https://fo4.dn.nexoncdn.co.kr/live/externalAssets/common/players/p${pimg}.png'|"
-                                             th:src="|http://fo4.dn.nexoncdn.co.kr/live/externalAssets/common/playersAction/p${stat.getStatId.getPlayer.getPlayerId}.png|"
-                                             src="https://ff4ggimages.s3.ap-northeast-2.amazonaws.com/unknown.png">
+                                        <img class="is-rounded mainimg-" th:classappend="${stat.getStatId().getPlayer().getPlayerId()}" >
                                         <img style="position: absolute;top: 79%" class="image" th:src="${stat.getStatId().getPlayer().getSeason().getImg()}"
                                              src="https://ssl.nexon.com/s2/game/fo4/obt/externalAssets/season/gr.png">
                                     </div>
@@ -58,10 +56,7 @@
                                 <i th:if="${index.index}<=2" th:class="|fa fa-crown king-icon k-${index.index}|"></i>
                                 <figure class="card-image is-128x128">
                                     <div style="width: fit-content; display: inline-block">
-                                        <img class="is-rounded" th:with="pimg=${stat.getStatId().getPlayer().getPlayerId()}%(${stat.getStatId().getPlayer().getSeason().getId()}*10000)"
-                                             th:onerror="|this.onerror=null;this.src='https://fo4.dn.nexoncdn.co.kr/live/externalAssets/common/players/p${pimg}.png'|"
-                                             th:src="|http://fo4.dn.nexoncdn.co.kr/live/externalAssets/common/playersAction/p${stat.getStatId.getPlayer.getPlayerId}.png|"
-                                             src="https://ff4ggimages.s3.ap-northeast-2.amazonaws.com/unknown.png">
+                                        <img class="is-rounded mainimg-" th:classappend="${stat.getStatId().getPlayer().getPlayerId()}" >
                                         <img style="position: absolute;top: 79%" class="image" th:src="${stat.getStatId().getPlayer().getSeason().getImg()}"
                                              src="https://ssl.nexon.com/s2/game/fo4/obt/externalAssets/season/gr.png">
                                     </div>
@@ -80,10 +75,7 @@
                                 <i th:if="${index.index}<=2" th:class="|fa fa-crown king-icon k-${index.index}|"></i>
                                 <figure class="card-image is-128x128">
                                     <div style="width: fit-content; display: inline-block">
-                                        <img class="is-rounded" th:with="pimg=${stat.getStatId().getPlayer().getPlayerId()}%(${stat.getStatId().getPlayer().getSeason().getId()}*10000)"
-                                             th:onerror="|this.onerror=null;this.src='https://fo4.dn.nexoncdn.co.kr/live/externalAssets/common/players/p${pimg}.png'|"
-                                             th:src="|http://fo4.dn.nexoncdn.co.kr/live/externalAssets/common/playersAction/p${stat.getStatId.getPlayer.getPlayerId}.png|"
-                                             src="https://ff4ggimages.s3.ap-northeast-2.amazonaws.com/unknown.png">
+                                        <img class="is-rounded mainimg-" th:classappend="${stat.getStatId().getPlayer().getPlayerId()}" >
                                         <img style="position: absolute;top: 79%" class="image" th:src="${stat.getStatId().getPlayer().getSeason().getImg()}"
                                              src="https://ssl.nexon.com/s2/game/fo4/obt/externalAssets/season/gr.png">
                                     </div>
@@ -102,10 +94,7 @@
                                 <i th:if="${index.index}<=2" th:class="|fa fa-crown king-icon k-${index.index}|"></i>
                                 <figure class="card-image is-128x128">
                                     <div style="width: fit-content; display: inline-block">
-                                        <img class="is-rounded" th:with="pimg=${stat.getStatId().getPlayer().getPlayerId()}%(${stat.getStatId().getPlayer().getSeason().getId()}*10000)"
-                                             th:onerror="|this.onerror=null;this.src='https://fo4.dn.nexoncdn.co.kr/live/externalAssets/common/players/p${pimg}.png'|"
-                                             th:src="|http://fo4.dn.nexoncdn.co.kr/live/externalAssets/common/playersAction/p${stat.getStatId.getPlayer.getPlayerId}.png|"
-                                             src="https://ff4ggimages.s3.ap-northeast-2.amazonaws.com/unknown.png">
+                                        <img class="is-rounded mainimg-" th:classappend="${stat.getStatId().getPlayer().getPlayerId()}" >
                                         <img style="position: absolute;top: 79%" class="image" th:src="${stat.getStatId().getPlayer().getSeason().getImg()}"
                                              src="https://ssl.nexon.com/s2/game/fo4/obt/externalAssets/season/gr.png">
                                     </div>
@@ -120,9 +109,18 @@
             </div>
             <div class="has-text-centered has-text-white">
                 <br><br>
-                <p>시즌 내 <span class="has-text-warning" th:text="${standardcnt}"></span> 경기 이상 출천한 선수들에 대한 정보입니다.</p>
+                <p>시즌 내 <span id="id-index-cnt" class="has-text-warning" th:text="${standardcnt}"></span> 경기 이상 출천한 선수들에 대한 정보입니다.</p>
                 <br><br>
             </div>
+        </div>
+    </div>
+</section>
+<section class="hero is-medium">
+    <div class="hero-body">
+        <div class="container">
+            <h1 id="id-index-season" class="title is-1 has-text-centered" th:text="|${thisseason}-시즌|">202111-시즌</h1>
+            <p class="title is-4 has-text-centered">포지션별 Top Player </p>
+            <div id="id-index-bestplayer"></div>
         </div>
     </div>
 </section>
@@ -131,7 +129,6 @@
     <div class="content has-text-centered">
         <p>
             <strong><a href="https://jgthms.com">FifaOnline4 Open-Api</a></strong> based. <small th:text="${svst}"></small><br>
-            <small>Title image by<a href="https://unsplash.com/">Unsplash</a>.</small><br>
             &copy;2021 pds0309 <a href="mailto:ehd0309@naver.com"><i class="fa fa-envelope-square"></i></a>
         </p>
     </div>
