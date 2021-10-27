@@ -63,8 +63,6 @@ project(':common'){
     jar { enabled = true }
     dependencies {
         runtimeOnly 'com.h2database:h2'
-        implementation 'com.oracle.database.jdbc:ojdbc8:19.6.0.0'
-        implementation 'com.oracle.database.jdbc:ucp:19.6.0.0'
         implementation group: 'org.modelmapper', name: 'modelmapper', version: '2.4.4'
     }
 }
@@ -73,7 +71,8 @@ project(':web'){
         implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
         implementation project(':common')
         implementation project(':openapi')
-
+        implementation 'com.oracle.database.jdbc:ojdbc8:19.6.0.0'
+        implementation 'com.oracle.database.jdbc:ucp:19.6.0.0'
     }
 }
 project(':schedule'){
@@ -81,7 +80,8 @@ project(':schedule'){
         implementation group: 'org.jsoup', name: 'jsoup', version: '1.13.1'
         implementation project(':common')
         implementation project(':openapi')
-
+        implementation 'com.oracle.database.jdbc:ojdbc8:19.6.0.0'
+        implementation 'com.oracle.database.jdbc:ucp:19.6.0.0'
     }
 }
 project(':openapi'){

@@ -106,6 +106,22 @@
     color: #f69999;
     background-color: black;
 }
+.p-ST, .p-LW, .p-RW, .p-CF {
+    color: red;
+    font-weight: bolder;
+}
+.p-CM, .p-CAM, .p-CDM, .p-LM, .p-RM {
+    color: #59ff00;
+    font-weight: bolder;
+}
+.p-CB, .p-LWB, .p-RWB, .p-RB , .p-LB , .p-SW {
+    color: #007bff;
+    font-weight: bolder;
+}
+.p-GK {
+    color: orange;
+    font-weight: bolder;
+}
 
 .pos-color-MF > small {
     color: lightgreen;
