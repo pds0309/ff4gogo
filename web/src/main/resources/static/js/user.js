@@ -880,7 +880,7 @@ function squadHtml(k, idx) {
 <div class="has-text-centered has-text-weight-bold is-size-3-desktop is-size-5-mobile mt-1"><p>교체선수</p><hr></div>
 <div id="sqd-${k}-${idx}-28" class="columns is-mobile">
 </div>
-<p id="mobilehovertext-name-${k}-${idx}" class="has-text-weight-bold">&nbsp;</p>`
+<p id="mobilehovertext-name-${k}-${idx}" class="has-text-weight-bold mobilehovertext-name">&nbsp;</p>`
 }
 
 
