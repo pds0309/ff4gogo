@@ -6,9 +6,15 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import  static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = {XgApi.class , SlApiConfig.class, RestTemplate.class})
@@ -21,14 +27,15 @@ class XgApiTest {
             ", \"x\": 0.88 ,\"y\": 0.45}";
 
     @Test
-    void getXgTest(){
-        String res = xgApi.getXgVal(exampleBody);
-        assertNotNull(res);
-        assertTrue(new JSONObject(res).has("prediction"));
+    void getXgTest() {
+        XgDto xgDto = xgApi.getXgVal(exampleBody);
+        assertNotNull(xgDto);
+        assertTrue(new JSONObject(xgDto).has("prediction"));
     }
+
     @Test
-    void getXgWithInvalidDataTest(){
-        String invBody = exampleBody.replace(",\"y\": 0.45","");
-        assertThrows(HttpServerErrorException.class, ()->xgApi.getXgVal(invBody));
+    void getXgWithInvalidDataTest() {
+        String invBody = exampleBody.replace(",\"y\": 0.45", "");
+        assertThrows(HttpClientErrorException.class, () -> xgApi.getXgVal(invBody));
     }
 }
