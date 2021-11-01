@@ -228,3 +228,8 @@
 /*    height : 0;*/
 /*    padding-top : calc(100 / 1000 * 100%);*/
 }
+
+.ele-no-react {
+    pointer-events: none;
+    background-color: #d0cbcb;
+}
