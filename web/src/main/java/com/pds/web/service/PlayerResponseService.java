@@ -1,7 +1,7 @@
 package com.pds.web.service;
 
 
-import com.pds.common.api.Fifa4PlayerImgApi;
+import com.pds.openapi.api.Fifa4PlayerImgApi;
 import com.pds.common.config.GenModelMapper;
 import com.pds.common.dto.PlayerDto;
 import com.pds.common.entity.Player;

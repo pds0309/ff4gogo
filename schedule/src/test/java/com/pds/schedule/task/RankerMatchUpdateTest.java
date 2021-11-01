@@ -61,9 +61,9 @@ class RankerMatchUpdateTest {
 
     @Test
     void jsonToStatTest(){
-        String player1 = "{\"statId\":202109,\"goal\":0,\"star\":8,\"cnt\":1,\"assist\":0,\"pId\":250204923,\"win\":1}";
-        String player2 = "{\"statId\":202109,\"goal\":0,\"star\":6,\"cnt\":1,\"assist\":0,\"pId\":300245279,\"win\":0}";
-        String player3 = "{\"statId\":202107,\"goal\":0,\"star\":4,\"cnt\":1,\"assist\":0,\"pId\":1234,\"win\":0}";
+        String player1 = "{\"statId\":202109,\"goal\":0,\"star\":8,\"cnt\":1,\"assist\":0,\"pId\":250204923,\"win\":1,\"spPosition\":14}";
+        String player2 = "{\"statId\":202109,\"goal\":0,\"star\":6,\"cnt\":1,\"assist\":0,\"pId\":300245279,\"win\":0,\"spPosition\":25}";
+        String player3 = "{\"statId\":202107,\"goal\":0,\"star\":4,\"cnt\":1,\"assist\":0,\"pId\":1234,\"win\":0,\"spPosition\":13}";
         List<JSONObject> jsonList = new ArrayList<>();
         jsonList.add(new JSONObject(player1));
         jsonList.add(new JSONObject(player2));
@@ -80,5 +80,6 @@ class RankerMatchUpdateTest {
         assertEquals(250204923,statList.get(0).getStatId().getPlayer().getPlayerId());
         assertEquals(300,statList.get(1).getStatId().getPlayer().getSeason().getId());
         assertEquals(8,statList.get(0).getStar());
+        assertEquals("CM",statList.get(0).getSpPosition());
     }
 }

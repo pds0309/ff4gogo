@@ -41,22 +41,22 @@ class StatServiceTest {
         statList.add(new Stat(
                 new StatId(
                         new Player(101123,"김갑환",new Season(101,"","","")),202109),
-                5,5,5,15,5));
+                5,5,5,15,5,"","ST"));
         statList.add(new Stat(
                 new StatId(
                         new Player(201125,"최번개",new Season(201,"","","")),202108),
-                2,1,3,15,4));
+                2,1,3,15,4,"","ST"));
         statList.add(new Stat(
                 new StatId(
                         new Player(301124,"장거한",new Season(301,"","","")),202109),
-                2,1,3,2,15));
+                2,1,3,2,15,"","ST"));
     }
 
     @Test
     void cnt75Test(){
-        List<Integer> cntList = Arrays.asList(1,2,3,4,5,6,7,8,9,10);
+        List<Integer> cntList = Arrays.asList(1,2,3,4,5,6,7,8,9,10,11);
         given(statRepository.findCnt(202109)).willReturn(cntList);
-        assertEquals(9,statService.getCnt75(202109));
+        assertEquals(10,statService.getCnt75(202109));
     }
     @Test
     void getThisSeasonTest(){
@@ -104,4 +104,20 @@ class StatServiceTest {
         assertEquals(statDtoList.get(0).getStatId().getPlayer().getPlayerId(),statList.get(0).getStatId().getPlayer().getPlayerId());
         assertEquals(statDtoList.get(1).getStar(),statList.get(1).getStar());
     }
+    @Test
+    void getBest11PlayersTest(){
+        List<Stat> best11 =  new ArrayList<>();
+        best11.add(statList.get(0));
+        given(statRepository.findTopBest11OneMatchSeason(202109,2)).willReturn(best11);
+        List<StatDto.Info> statDtoList = statService.getBest11Players(202109,2);
+        assertEquals(statDtoList.get(0).getStatId().getPlayer().getPlayerId(),statList.get(0).getStatId().getPlayer().getPlayerId());
+    }
+    @Test
+    void getBest11PlayersNoDataTest(){
+        List<Stat> best11 =  new ArrayList<>();
+        best11.add(statList.get(0));
+        given(statRepository.findTopBest11OneMatchSeason(112,202111)).willReturn(new ArrayList<>());
+        assertTrue(statService.getBest11Players(202111,112).isEmpty());
+    }
+
 }

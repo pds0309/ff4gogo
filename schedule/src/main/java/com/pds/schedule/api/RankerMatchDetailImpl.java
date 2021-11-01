@@ -1,7 +1,7 @@
 package com.pds.schedule.api;
 
 
-import com.pds.common.api.WhoseMatchDetail;
+import com.pds.openapi.api.WhoseMatchDetail;
 import lombok.extern.log4j.Log4j2;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -46,7 +46,8 @@ public class RankerMatchDetailImpl implements WhoseMatchDetail<List<JSONObject>>
                                 .put("cnt", 1)
                                 .put("win", (matchResult.equals("승") ? 1 : 0))
                                 .put("pId", pId)
-                                .put("statId", matchSeasonId));
+                                .put("statId", matchSeasonId)
+                                .put("spPosition",pos));
                     }
                 }
             } catch (JSONException ignored) {

@@ -21,22 +21,27 @@ public class StatSchedule {
 
     private final StatRepository statRepository;
 
-    @Scheduled(cron = "0 0 5 * * ?")
-    public void cronStat(){
+    @Scheduled(cron = "0 0 2 * * ?")
+    public void cronStat() {
         updateStat();
         log.info("Stat 테이블 업데이트 완료");
         rankerUpdate.setRankerMatchZero();
     }
 
-    public void updateStat(){
+    public void updateStat() {
         List<Stat> updateRequiredStatList = rankerUpdate.getStatList();
         for (Stat currStat : updateRequiredStatList) {
             Optional<Stat> prevStat = statRepository.findById(currStat.getStatId());
             if (prevStat.isPresent()) {
                 int cnt = prevStat.get().getCnt() + 1;
-                statRepository.save(Stat.builder(prevStat.get(), currStat, cnt).build());
+                Stat stat = Stat.builder(prevStat.get(), currStat , cnt).build();
+                stat.setMostPos();
+                statRepository.save(stat);
             } else {
                 log.info(currStat.getStatId().getPlayer().getPlayerName() + currStat.getStatId().getMatchSid() + " is new Stat");
+                String pos = "{\"LM\":0,\"ST\":0,\"CF\":0,\"GK\":0,\"SW\":0,\"RW\":0,\"CM\":0,\"LW\":0,\"CDM\":0,\"CAM\":0,\"RB\":0,\"LB\":0,\"LWB\":0,\"RM\":0,\"RWB\":0,\"CB\":0}";
+                currStat.setSpPosition(currStat.setPos(currStat.getSpPosition(),pos));
+                currStat.setMostPos();
                 statRepository.save(currStat);
             }
         }

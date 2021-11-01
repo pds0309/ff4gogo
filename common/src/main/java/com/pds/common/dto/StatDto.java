@@ -1,6 +1,7 @@
 package com.pds.common.dto;
 
 
+import com.pds.common.enums.Positions;
 import lombok.*;
 import org.json.JSONObject;
 
@@ -19,6 +20,8 @@ public class StatDto {
         private double star;
         private int cnt;
         private double win;
+        private String spPosition;
+        private String mostPos;
     }
 
     @Getter
@@ -39,14 +42,15 @@ public class StatDto {
         private double star;
         private int cnt;
         private double win;
-
+        private String spPosition;
         public static StatBodyDtoBuilder builder(JSONObject jsonObject){
             return StatBodyDtoJsonBuilder()
                     .goal(jsonObject.getDouble("goal"))
                     .assist(jsonObject.getDouble("assist"))
                     .star(jsonObject.getDouble("star"))
                     .cnt(jsonObject.getInt("cnt"))
-                    .win(jsonObject.getDouble("win"));
+                    .win(jsonObject.getDouble("win"))
+                    .spPosition(Positions.getPos(jsonObject.getInt("spPosition")).getPosInfo());
         }
     }
 }

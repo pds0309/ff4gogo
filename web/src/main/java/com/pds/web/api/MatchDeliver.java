@@ -4,11 +4,15 @@ package com.pds.web.api;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pds.common.enums.Positions;
+import com.pds.web.exception.ErrorInfo;
+import com.pds.web.exception.UserRequestException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public final class MatchDeliver {
 
@@ -41,11 +45,13 @@ public final class MatchDeliver {
         return shootDtoList;
     }
     static int calGoalTime(int time){
+        int[] timeArray = {0,45,90,105};
         int realTime = 0;
         if (time >= 16777220) {
-            realTime = (time - 16777220) / 60 + 45;
+            realTime = (time % 16777220) / 60 + (timeArray[time/16777220]);
         } else {
             realTime = time / 60;
+            if(realTime>45){realTime = -realTime;}
         }
         return realTime;
     }
@@ -120,6 +126,23 @@ public final class MatchDeliver {
             list.add(summaryDto);
         }
         return list;
+    }
+
+    public static List<MatchDto.BestDto> getMyMvpList(List<MatchDto.MatchPlayerDto> matchPlayerDtoList){
+        //유저 최근경기가 모두 조기 몰수 처리되었다면 선수 데이터가 없을 수도 있다. 예외처리가 필요하다.
+        if(matchPlayerDtoList.isEmpty()){
+            throw new UserRequestException(ErrorInfo.FF4_API_ERROR);
+        }
+        Map<Integer , MatchDto.BestDto> playerMap = new HashMap<>();
+        for (MatchDto.MatchPlayerDto matchPlayerDto : matchPlayerDtoList) {
+            int id = matchPlayerDto.getSpId();
+            if (!playerMap.containsKey(id)) {
+                playerMap.put(id, MatchDto.BestDto.builder(matchPlayerDto).build());
+            } else {
+                playerMap.get(id).setAll(matchPlayerDto);
+            }
+        }
+        return new ArrayList<>(playerMap.values());
     }
 
 }

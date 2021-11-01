@@ -1,8 +1,8 @@
 package com.pds.schedule.api;
 
 
-import com.pds.common.api.UserApiDataCollection;
-import com.pds.common.api.WhoseMatchDetail;
+import com.pds.openapi.api.UserApiDataCollection;
+import com.pds.openapi.api.WhoseMatchDetail;
 import com.pds.schedule.TestMatchDetail;
 
 import org.json.JSONObject;
@@ -40,7 +40,7 @@ class RankerMatchFinderTest {
     void getRankersMatchCodeMapTest() {
         List<String> list = new ArrayList<>();
         list.add(userId);
-        given(userApiDataCollection.getUserMatchesFromApi(userId, 20)).willReturn(matchList);
+        given(userApiDataCollection.getUserMatchesFromApi(userId, 10)).willReturn(matchList);
         Map<String,List<String>> result = rankerMatchFinder.getRankersMatchCodeMap(list);
         assertEquals(matchList.get(0), result.get(userId).get(0));
         System.out.println(result);
