@@ -1,7 +1,7 @@
 package com.pds.web.service;
 
 
-import com.pds.common.api.UserApiDataCollection;
+import com.pds.openapi.api.UserApiDataCollection;
 import com.pds.common.config.GenModelMapper;
 import com.pds.common.config.ModelMapperConfig;
 import com.pds.common.dto.UsersDto;
@@ -42,7 +42,9 @@ class UserServiceTest {
     private UserApiDataCollection userApi;
 
     private final Users users = new Users("NAME","ID",250,2000);
-
+    private JSONObject userJson = new JSONObject()
+            .put("nickname","NAME").put("accessId","ID")
+            .put("level",250);
     @Test
     void getUserInfoTest(){
         given(usersRepository.findByUserId("ID")).willReturn(Optional.of(users));
@@ -64,7 +66,7 @@ class UserServiceTest {
 
     @Test
     void findUserTest(){
-        given(userApi.getUserInfo("NAME")).willReturn(userDto);
+        given(userApi.getUserInfo("NAME")).willReturn(userJson);
         given(userApi.getUserRank("ID")).willReturn(2000);
         UsersDto.Info resultDto = userSearchService.findUser("NAME");
         assertEquals(userDto.getUserName(),resultDto.getUserName());

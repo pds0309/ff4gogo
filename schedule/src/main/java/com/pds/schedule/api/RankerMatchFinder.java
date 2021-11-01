@@ -1,8 +1,7 @@
 package com.pds.schedule.api;
 
-import com.pds.common.api.UserApiDataCollection;
-import com.pds.common.api.WhoseMatchDetail;
-import com.pds.common.dto.UsersDto;
+import com.pds.openapi.api.UserApiDataCollection;
+import com.pds.openapi.api.WhoseMatchDetail;
 import com.pds.schedule.scrap.RankerScrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -29,12 +28,12 @@ public class RankerMatchFinder {
     private WhoseMatchDetail<List<JSONObject>> matchDetail;
 
     public List<String> getRankerIdList() {
-        List<String> rankerNameList = RankerScrapper.getRankerListFromWeb(9);
+        List<String> rankerNameList = RankerScrapper.getRankerListFromWeb(18);
         List<String> rankerIdList = new ArrayList<>();
         for (String s : rankerNameList) {
-            UsersDto.UserApiResponse result = userApiDataCollection.getUserInfo(s);
-            if (result != null) {
-                rankerIdList.add(result.getUserId());
+            JSONObject jsonObject = userApiDataCollection.getUserInfo(s);
+            if (jsonObject != null) {
+                rankerIdList.add(jsonObject.getString("accessId"));
             }
         }
         return rankerIdList;
@@ -43,7 +42,7 @@ public class RankerMatchFinder {
     public Map<String, List<String>> getRankersMatchCodeMap(List<String> rankerIdList) {
         Map<String, List<String>> rankerMatchMap = new HashMap<>();
         for (String s : rankerIdList) {
-            rankerMatchMap.put(s, userApiDataCollection.getUserMatchesFromApi(s, 20));
+            rankerMatchMap.put(s, userApiDataCollection.getUserMatchesFromApi(s, 10));
         }
         return rankerMatchMap;
     }

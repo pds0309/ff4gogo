@@ -9,7 +9,7 @@ $(document).ready(function () {
         }
         let gangsined = los.timestamp;
         postGangsin(gangsined);
-        postDerBogi(los.allcode.length,los.codes.length);
+        postDerBogi(los.allcode.length, los.codes.length);
         los = JSON.parse(localStorage.getItem(userid));
         getSummaryInfo(userid, los.detail);
         return;
@@ -25,14 +25,14 @@ $(document).ready(function () {
                 return new Promise((resolve, reject) => {
                     setTimeout(() => {
                         getMatchDetailList(userid, param)
-                            .done(function (result) {
-                                if (result.code !== -301) {
+                            .done(function (result, textStatus, jqXHR) {
+                                if (jqXHR.status !== 204) {
                                     resolve(md[k] = result.data);
                                     resolve(mc[k] = matchList[k]);
                                 } else {
                                     resolve(null);
                                     matchList[k] = null;
-                                    $(`#id-finderror`).append(`<p>[-301] 비정상적인 순위경기 제외됨</p>`);
+                                    $(`#id-finderror`).append(`<p>비정상적인 순위경기 제외됨</p>`);
                                 }
                             });
                     }, 3);
@@ -46,8 +46,8 @@ $(document).ready(function () {
 
             parallel(getMatch).then(val => {
                 let value = val.filter(v => v !== null);
-                let matchCodes = mc.filter(v=>v!==null);
-                let ml = matchList.filter(v=>v!==null);
+                let matchCodes = mc.filter(v => v !== null);
+                let ml = matchList.filter(v => v !== null);
                 for (let k = 0; k < value.length; k++) {
                     getViewMatches(value[k], k);
                 }
@@ -59,7 +59,7 @@ $(document).ready(function () {
                 }
                 deleteFromLocal();
                 localStorage.setItem(userid, JSON.stringify(matches));
-                postDerBogi(ml.length , matchCodes.length);
+                postDerBogi(ml.length, matchCodes.length);
                 getSummaryInfo(userid, JSON.parse(localStorage.getItem(userid)).detail);
             });
         })
@@ -100,7 +100,7 @@ function clickDetail(k, dto) {
                                 <li class="is-active"><a href="#squad-${k}">Squad</a></li>
                                 <li><a href="#match-${k}">경기</a></li>
                                 <li><a href="#player-${k}">선수</a></li>
-                                <li><a href="#shoot-${k}">슛</a></li>
+                                <li id="id-shoot-${k}-li" class="ele-no-react"><a id="id-shoot-${k}" href="#shoot-${k}">슛</a></li>
                             </ul>
                         </div>
                         <div>
@@ -140,19 +140,7 @@ function clickDetail(k, dto) {
     ${playerTableHTML(k, 1)}
 </div>
                             </div>
-                            <div id="shoot-${k}" class="container tab_content inner ${k}">
-<div class="has-text-black is-size-3-desktop is-size-5-mobile has-text-centered has-text-weight-bold">
-<p>슈팅분포</p><hr>
-<p id="shoot-all-warn-${k}" class="is-size-7-mobile has-text-danger"></p>
-</div>
-<div id="shoot-all-${k}" class="has-text-centered is-fullwidth p-0 shootscatter">
-</div>
-<hr>
-<div class="has-text-black is-size-3-desktop is-size-5-mobile has-text-centered has-text-weight-bold">
-<p>기대득점[xG]</p><hr>
-<p class="is-size-5-desktop is-size-7-mobile">준비중입니다!</p>
-</div>
-</div>
+                            <div id="shoot-${k}" class="container tab_content inner ${k}"></div>
                             </div>
                         </div>
                     </div>`);
@@ -166,6 +154,37 @@ function clickDetail(k, dto) {
                 $(`#player-all-${k}-${!status}`).css('display', 'none');
                 $(`#player-all-${k}-${status}`).css('display', 'block');
             });
+            let myShoots = sortDto(dto.shootDtoList[0], "goalTime");
+            let yourShoots = sortDto(dto.shootDtoList[1], "goalTime");
+            let shootDto = [myShoots, yourShoots];
+            getXg(myShoots);
+            getXg(yourShoots);
+            setTimeout( function () {
+                $(`#id-shoot-${k}-li`).removeClass('ele-no-react');
+            }, 1800);
+            $(`#id-shoot-${k}`).click(function () {
+                if ($(`#shoot-${k}`).text().length === 0) {
+                    $(`#shoot-${k}`).append(`
+                        <div class="has-text-black is-size-3-desktop is-size-5-mobile has-text-centered has-text-weight-bold">
+                            <p>슈팅분포</p>
+                            <hr>
+                                <p id="shoot-all-warn-${k}" class="is-size-7-mobile has-text-danger"></p>
+                        </div>
+                    <div id="shoot-all-${k}" class="has-text-centered is-fullwidth p-0 shootscatter">
+                    </div>
+                    <hr>
+                        <div class="has-text-black is-size-3-desktop is-size-5-mobile has-text-centered has-text-weight-bold">
+                            <p>경기기대득점[XG] 추이</p>
+                            <hr>
+                                <p id="xgchart-${k}" class="is-size-5-desktop is-size-7-mobile"></p>
+                        </div>`
+                    );
+                    setTimeout( function () {
+                        getShootChart(k, shootDto, myname, yourname);
+                        getXgChart(k, shootDto, myname, yourname);
+                    }, 200);
+                }
+            });
             getOneMatchInfo(dto, k);
             let mySummary = dto.summaryDtoList[0];
             let yourSummary = dto.summaryDtoList[1];
@@ -176,7 +195,6 @@ function clickDetail(k, dto) {
             getMatchHorBar(k, 0, dto.summaryDtoList, sumarryKeys, myname, yourname);
             getPossChart(k, mySummary["possession"], yourSummary["possession"], myname, yourname);
             getPassChart(k, myname, dto.passDtoList[0]);
-            getShootChart(k, dto.shootDtoList, myname, yourname);
             let pIdSet = new Set();
             dto.matchPlayerDtoList.map(value => value.forEach(function (item) {
                 let cook = getCookie(item.spId);
@@ -194,22 +212,53 @@ function clickDetail(k, dto) {
                         addClasForPlayer(player);
                     })
             )
+            $(`.tab_content.inner.${k}`).hide(); //Hide all content
+            $(`#squad-${k}`).addClass("active").show(); //Activate first tab
+            $(`#squad-${k}`).show(); //Show first tab content
+            $(`ul.tabs.inner.${k} li`).click(function () {
+                $(`ul.tabs.inner.${k} li`).removeClass("is-active"); //Remove any "active" class
+                $(this).addClass("is-active"); //Add "active" class to selected tab
+                $(`.tab_content.inner.${k}`).hide(); //Hide all tab content
+                var activeTab = $(this).find("a").attr("href"); //Find the href attribute value to identify the active tab + content
+                $(activeTab).fadeIn(); //Fade in the active ID content
+                return false;
+            });
         }
-        $(`.tab_content.inner.${k}`).hide(); //Hide all content
-        $(`#squad-${k}`).addClass("active").show(); //Activate first tab
-        $(`#squad-${k}`).show(); //Show first tab content
-        $(`ul.tabs.inner.${k} li`).click(function () {
-            $(`ul.tabs.inner.${k} li`).removeClass("is-active"); //Remove any "active" class
-            $(this).addClass("is-active"); //Add "active" class to selected tab
-            $(`.tab_content.inner.${k}`).hide(); //Hide all tab content
-            var activeTab = $(this).find("a").attr("href"); //Find the href attribute value to identify the active tab + content
-            $(activeTab).fadeIn(); //Fade in the active ID content
-            return false;
-        });
     } else {
         detailDiv.style.display = "none";
     }
 }
+
+function getXg(shootdtoList) {
+    for (let i = 0; i < shootdtoList.length; i++) {
+        let shotType = [0, 0, 0, 0];
+        shotType[shootdtoList[i]["type"]] = 1;
+        let shootInfo = {
+            assist: (shootdtoList[i]["assist"]) ? 1 : 0,
+            asx: shootdtoList[i]["assistX"],
+            asy: shootdtoList[i]["assistY"],
+            inv: (i === 0) ? shootdtoList[i]["goalTime"] : shootdtoList[i]["goalTime"] - shootdtoList[i - 1]["goalTime"],
+            x: shootdtoList[i]["x"],
+            y: shootdtoList[i]["y"],
+            nom: shotType[1],
+            fin: shotType[2],
+            hed: shotType[3]
+        }
+        $.ajax({
+            type: 'POST',
+            url: '/expectedgoal',
+            contentType: 'application/json',
+            data: JSON.stringify(shootInfo),
+            success: function (response) {
+                shootdtoList[i].prediction = response["prediction"];
+            },
+            error: function (response) {
+                shootdtoList[i].prediction = 0;
+            }
+        });
+    }
+}
+
 
 function addClasForPlayer(player) {
     let pId = player.info.playerId;
@@ -235,8 +284,10 @@ function getOneMatchInfo(dto, k) {
 function putGoalInfo(shootDto, k, idx) {
     for (let obj of shootDto) {
         if (obj.result === 3) {
+            let gt = obj.goalTime;
+            gt = (gt >= 0) ? gt : '45+' + (-gt - 45);
             $(`#match-goals-${k}-${idx}`).append(`
-            <small><i class="fa fa-futbol"></i>&nbsp;${obj.goalTime}'<span class="get-${obj.spId}-name"></span></small><br>`);
+            <small><i class="fa fa-futbol"></i>&nbsp;${gt}'<span class="get-${obj.spId}-name"></span></small><br>`);
         }
     }
 }
@@ -257,15 +308,15 @@ function putSquad(playerDto, k, idx) {
             $(`#sqd-${k}-${idx}-28`)
                 .append(`<div class="column mywidth-16">
 <figure class="image is-96x96 resp is-inline-block mt-1 is-relative">
-                        <img class="image hovsub pos-taeduri-${obj.rootPosName} get-${obj.spId}-img"  src="" alt="player">
+                        <img class="image hovsub pos-taeduri-${obj.rootPosName} get-${obj.spId}-img im-${k}-${idx}"  src="" alt="player">
                          <img class="image get-${obj.spId}-simg" style="position: absolute;bottom: 0;left: 0;width: 29%;height: 29%" src="" alt="season">
                              <img class="image" style="position: absolute;bottom: 0;right: 0;width: 29%;height: 29%" src="/img/e${obj.spGrade}.PNG">
                     </figure>
                     <p class="myp has-text-black verysmall" style="margin-top: -8px;margin-bottom: -8px;"><small id="subs-${k}-${idx}-${obj.spId}" class="get-${obj.spId}-name"></small></p>                 
                          </div>                                        
 `);
-            $(`.image.hovsub.get-${obj.spId}-img`).hover(function () {
-                $(`#mobilehovertext-name`).text($(`#subs-${k}-${idx}-${obj.spId}`).text());
+            $(`.image.hovsub.get-${obj.spId}-img.im-${k}-${idx}`).hover(function () {
+                $(`#mobilehovertext-name-${k}-${idx}`).text($(`#subs-${k}-${idx}-${obj.spId}`).text());
             });
         }
     }
@@ -288,8 +339,10 @@ function getMatchCodeList(userid) {
 
 function getMatchDetailList(userid, usermatchCode) {
     return $.ajax({
-        type: 'GET',
-        url: `/users/${userid}/matches?mc=${usermatchCode}`
+        type: 'PUT',
+        url: `/users/${userid}/matches`,
+        contentType: "application/json",
+        data: usermatchCode
     });
 }
 
@@ -319,25 +372,25 @@ function getMoreMatch(id) {
         return new Promise((resolve) => {
             setTimeout(() => {
                 getMatchDetailList(id, newMatchList[k])
-                    .done(function (result) {
-                        if (result.code !== -301) {
+                    .done(function (result, textStatus, jqXHR) {
+                        if (jqXHR.status !== 204) {
                             resolve(result.data);
-                        }
-                        else{
+                        } else {
                             resolve(null);
-                            $(`#id-finderror`).append(`<p class="clas">[-301] 비정상적인 순위경기 제외됨</p>`);
+                            $(`#id-finderror`).append(`<p class="clas">비정상적인 순위경기 제외됨</p>`);
                         }
                     });
             }, 3);
         });
     }
+
     async function paral(matches) {
         const result = matches.map((param, k) => asyncMoreMatches(param, k));
         return await Promise.all(result);
     }
 
     paral(newMatchList).then(value => {
-        let val = value.filter(v=>v!==null);
+        let val = value.filter(v => v !== null);
         for (let k = 0; k < val.length; k++) {
             getViewMatches(val[k], index + k);
         }
@@ -364,7 +417,7 @@ function getGangsin(id) {
     window.location.reload();
 }
 
-function postDerBogi(len ,cur) {
+function postDerBogi(len, cur) {
     if (len > cur) {
         $('#id-derbogi').show();
     }
@@ -381,6 +434,7 @@ function getSummaryInfo(userid, dtos) {
     let mypassDto = [];
     let yourpassDto = [];
     let dribbles = [0, 0];
+    let goalTimes1 = [[], []];
     for (let dto of dtos) {
         let result = dto.basicDtoList[0].matchResult;
         if (result === "승") {
@@ -412,9 +466,14 @@ function getSummaryInfo(userid, dtos) {
         yourpassDto.push(dto.passDtoList[1]);
         goal[0] += dto.basicDtoList[0].goalTotal;
         goal[1] += dto.basicDtoList[1].goalTotal;
+        let myShoots = dto.shootDtoList[0].filter(g => g.result === 3);
+        let yourShoots = dto.shootDtoList[1].filter(g => g.result === 3);
+        goalTimes1[0] = goalTimes1[0].concat(myShoots.map(value => value.goalTime));
+        goalTimes1[1] = goalTimes1[1].concat(yourShoots.map(value => value.goalTime));
     }
     getGoalBar(goal, dtos.length);
     getWdlDonut(wdl, dtos.length);
+    getGoalTimeBar(goalTimes1[0].sort(), goalTimes1[1].sort());
     getMvps(myplayers, userid);
     if (idx === 0) {
         return;
@@ -537,12 +596,324 @@ function yourStar(bestdto) {
         });
 }
 
+function getHTMLMvps(simg, pimg, pname) {
+    return `<figure class="card-image is-128x128">
+                                        <div style="width: fit-content; display: inline-block">
+                                            <img class="is-rounded" src="${pimg}">
+                                            <img style="position: absolute;top: 79%" class="image"
+                                                 src="${simg}">
+                                        </div>
+                                    </figure>
+                                    <p class="is-size-6 has-text-weight-bold">${pname}</p>`;
+}
+
+function getHTMLMatches(basic, owngoals, k) {
+    let mybasic = basic[0];
+    let yourbasic = basic[1];
+    let endtype = ["", "몰수", "몰수"];
+    let resultColor = mybasic.matchResult === "승" ? "#add8e6" : (mybasic.matchResult === "무") ? "#d3d3d3" : "#fcadc8";
+    let controllers = (mybasic.controller === "etc") ? "question" : mybasic.controller;
+    let htmls = `<div id="id-match-${k}" class="has-text-centered has-text-white clas">
+                <div class="card">
+                    <header class="card-header" style="background-color: ${resultColor}">&nbsp;&nbsp;&nbsp;
+                        <p class="card-header-title is-size-4-desktop is-size-6-mobile">
+                            ${endtype[mybasic.matchEndType]}${mybasic.matchResult}
+                        </p>
+                        <span class="card-header-icon has-text-right is-size-5-desktop is-size-7-mobile">${mybasic.matchDate}</span>
+                        <button id="id-match-btn-${k}" class="card-header-icon hovable" aria-label="more options">
+                            <span class="icon">
+                            <i class="fa fa-angle-down" aria-hidden="true"></i>
+                        </span>
+                        </button>
+                    </header>
+                    <div class="card-content">
+                        <div class="content has-text-weight-bold is-size-4-desktop is-size-7-mobile">
+                            <span>
+                                <i class="fa fa-${controllers}"></i>
+                            &nbsp;&nbsp;<span id="uname-${k}-0">${mybasic.nickname}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${mybasic.goalTotal + owngoals[1]} : ${yourbasic.goalTotal + owngoals[0]}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="uname-${k}-1">${yourbasic.nickname}</span>&nbsp;&nbsp;
+                                <i class="fa fa-${controllers}"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div id="id-match-detail-${k}" class="card-content pl-3 pr-3" style="display: none"></div>
+                </div><br><br>
+            </div>`;
+    $(`#id-container-matchlist`).append(htmls);
+}
+
+
+function getAnalGita() {
+    $('#anal-1').toggle();
+}
+
+function empText(val) {
+    return `<span class="has-text-weight-bold">${val}</span>`;
+}
+
+function dtoReducer(keys, obj) {
+    return obj.reduce(function (pre, cur) {
+        for (let i of keys) {
+            pre[i] += cur[i];
+        }
+        return pre;
+    });
+}
+
+function sortDto(dto, key) {
+    return dto.sort(function (o1, o2) {
+        return Math.abs(o1[key]) - Math.abs(o2[key])
+    });
+}
+
+function addPlayerCooc(playerDto) {
+    console.log("과자먹을래?");
+    playerDto.map(value => getPlayerInfo(value.spId)
+        .done(function (result) {
+            setCookie(value.spId, JSON.stringify(result.data), window.location.pathname);
+        }));
+}
+
+function squadHtml(k, idx) {
+    return `
+<div class="column is-mobile" style="background: url(/img/soccerfield.png) no-repeat 0 0;background-size:100% 100%;">
+<div class="columns is-mobile">
+        <div class="column is-one-fifth has-text-centered">&nbsp;</div>
+        <div id="sqd-${k}-${idx}-26" class="column is-one-fifth has-text-centered"></div>
+        <div id="sqd-${k}-${idx}-25" class="column is-one-fifth has-text-centered"></div>
+        <div id="sqd-${k}-${idx}-24" class="column is-one-fifth has-text-centered"></div>
+        <div class="column is-one-fifth has-text-centered">&nbsp;</div>
+</div>
+<div class="columns is-mobile">
+    <div id="sqd-${k}-${idx}-27" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-22" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-21" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-20" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-23" class="column is-one-fifth "></div>                                        
+</div>
+<div class="columns is-mobile">
+    <div class="column is-one-fifth"></div>                                        
+    <div id="sqd-${k}-${idx}-19" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-18" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-17" class="column is-one-fifth "></div>                                        
+    <div class="column is-one-fifth "></div>                                     
+</div>
+<div class="columns is-mobile">
+    <div id="sqd-${k}-${idx}-16" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-15" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-14" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-13" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-12" class="column is-one-fifth "></div>
+    </div>
+<div class="columns is-mobile">
+    <div id="sqd-${k}-${idx}-8" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-11" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-10" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-9" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-2" class="column is-one-fifth "></div>                                        
+</div>
+<div class="columns is-mobile">
+    <div id="sqd-${k}-${idx}-7" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-6" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-5" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-4" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-3" class="column is-one-fifth "></div>                                        
+</div>
+<div class="columns is-mobile">
+    <div class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-1" class="column is-one-fifth "></div>                                        
+    <div id="sqd-${k}-${idx}-0" class="column is-one-fifth "></div>                                        
+    <div class="column is-one-fifth "></div>                                        
+</div>                      
+</div>
+<div class="has-text-centered has-text-weight-bold is-size-3-desktop is-size-5-mobile mt-1"><p>교체선수</p><hr></div>
+<div id="sqd-${k}-${idx}-28" class="columns is-mobile">
+</div>
+<p id="mobilehovertext-name-${k}-${idx}" class="has-text-weight-bold mobilehovertext-name">&nbsp;</p>`
+}
+
+
+function playerTableHTML(k, idx) {
+    return `<table class="table is-size-6-desktop is-size-7-mobile" style="margin: 0 auto">
+  <thead>
+    <tr>
+      <th class="mytable-no-scroll"><abbr title="선수">PLAYER</abbr></th>
+      <th><abbr title="포지션">POS</abbr></th>
+      <th><abbr title="평점">STAR</abbr><i class="fa fa-angle-down" onclick="tbSorter(${k},${idx},2,this)"></i></th>
+      <th><abbr title="슈팅">SHOT</abbr><i class="fa fa-angle-down" onclick="tbSorter(${k},${idx},3,this)"></i></th>
+      <th><abbr title="유효슈팅">E_SHOT</abbr><i class="fa fa-angle-down" onclick="tbSorter(${k},${idx},4,this)"></i></th>
+      <th><abbr title="득점">GOL</abbr><i class="fa fa-angle-down" onclick="tbSorter(${k},${idx},5,this)"></i></th>
+      <th><abbr title="어시스트">ASI</abbr><i class="fa fa-angle-down" onclick="tbSorter(${k},${idx},6,this)"></i></th>
+      <th><abbr title="패스시도">PAS</abbr><i class="fa fa-angle-down" onclick="tbSorter(${k},${idx},7,this)"></i></th>
+      <th><abbr title="패스성공">S_PAS</abbr><i class="fa fa-angle-down" onclick="tbSorter(${k},${idx},8,this)"></i></th>
+      <th><abbr title="드리블시도">DRIB</abbr><i class="fa fa-angle-down" onclick="tbSorter(${k},${idx},9,this)"></i></th>
+      <th><abbr title="드리블성공">S_DRIB</abbr><i class="fa fa-angle-down" onclick="tbSorter(${k},${idx},10,this)"></i></th>
+      <th><abbr title="가로채기">INCT</abbr></th>
+      <th><abbr title="선방">BLOK</abbr></th>
+      <th><abbr title="태클시도">TAKLE</abbr></th>
+      <th><abbr title="태클성공">S_TAKLE</abbr></th>
+      <th><abbr title="경고">YCARD</abbr></th>
+      <th><abbr title="퇴장">RCARD</abbr></th>
+    </tr>
+  </thead>
+  <tbody id="tbod-${k}-${idx}">
+  </tbody>
+</table>`;
+}
+
+
+
+function addPlayerTableData(k, idx, playerDto) {
+    let tableArr = ['spRating', 'shoot', 'effectiveShoot', 'goal', 'assist', 'passTry', 'passSuccess',
+        'dribbleTry', 'dribbleSuccess', 'intercept', 'block', 'tackleTry', 'tackle', 'yellowCards', 'redCards'];
+    let player = playerDto.slice(0, 11);
+    for (let p of player) {
+        let start = `<tr><td class="get-${p.spId}-name mytable-no-scroll has-text-left has-text-weight-bold" style="white-space: nowrap"></td><td class="pos-color-${p.rootPosName}"><small style="background-color: white">${p.posName}</small></td>`;
+        tableArr.map(value => {
+            start += '<td>' + p[value] + '</td>';
+        });
+        $(`#tbod-${k}-${idx}`).append(`${start}</tr>`);
+    }
+}
+
+function tbSorter(k, idx, index, t) {
+    let clas = $(t).attr('class');
+    let sortType = (clas.indexOf('down') === -1) ? 'up' : 'down';
+    var checkSort = true;
+    var target = $(`#tbod-${k}-${idx}`).find('tr');
+    while (checkSort) {
+        checkSort = false;
+        target.each(function (i, row) {
+            if (row.nextSibling == null) return;
+            var fCell = parseFloat(row.cells[index].innerHTML);
+            var sCell = parseFloat(row.nextSibling.cells[index].innerHTML);
+            if (sortType == 'up' && fCell > sCell) {
+                $(row.nextSibling).insertBefore($(row));
+                checkSort = true;
+            }
+            if (sortType == 'down' && fCell < sCell) {
+                $(row.nextSibling).insertBefore($(row));
+                checkSort = true;
+            }
+        });
+    }
+    $(t).attr('class', clas.replace(sortType, (sortType === 'up') ? 'down' : 'up'));
+}
+
+
+function getGoalTimeBar(myGoaltime, yourGoaltime) {
+    let mygoals = decideGoalTime(myGoaltime);
+    let yourgoals = decideGoalTime(yourGoaltime);
+    var options = {
+        series: [{
+            name: '득점',
+            data: mygoals
+        }, {
+            name: '실점',
+            data: yourgoals
+        }],
+        chart: {
+            type: 'bar',
+            foreColor: '#FFFFFF',
+            toolbar: {
+                show: false
+            },
+            height: 300
+        },
+        plotOptions: {
+            bar: {
+                borderRadius: 4,
+                horizontal: false,
+                columnWidth: '55%',
+                endingShape: 'rounded'
+            },
+        },
+        dataLabels: {
+            enabled: false
+        },
+        colors: ['#468af6', '#de5d5d'],
+        stroke: {
+            show: true,
+            width: 2,
+            colors: ['transparent']
+        },
+        xaxis: {
+            categories: ['0-15', '15-30', '30-45', '45++', '45-60', '60-75', '75-90', '90++'],
+        },
+        yaxis: {
+            labels: {
+                show: false
+            }
+        },
+        grid: {
+            show: false
+        },
+        fill: {
+            opacity: 1
+        },
+        tooltip: {
+            theme: 'dark',
+            x: {
+                show: true
+            },
+            y: {
+                title: {
+                    formatter: function () {
+                        return '';
+                    }
+                }
+            }
+        },
+        title: {
+            text: `득/실 시간분포`,
+            align: 'center'
+        }
+    };
+
+    var chart = new ApexCharts(document.querySelector("#basic-gtime-chart"), options);
+    chart.render();
+}
+function decideGoalTime(goalTime) {
+    let goals = [0, 0, 0, 0, 0, 0, 0, 0];
+    for (let i = 0; i < goalTime.length; i++) {
+        if (goalTime[i] < 0) {
+            goals[3]++;
+            continue;
+        }
+        if (goalTime[i] < 15) {
+            goals[0]++;
+            continue;
+        }
+        if (goalTime[i] < 30) {
+            goals[1]++;
+            continue;
+        }
+        if (goalTime[i] < 45) {
+            goals[2]++;
+            continue;
+        }
+        if (goalTime[i] < 60) {
+            goals[4]++;
+            continue;
+        }
+        if (goalTime[i] < 75) {
+            goals[5]++;
+            continue;
+        }
+        if (goalTime[i] < 90) {
+            goals[6]++;
+            continue;
+        }
+        goals[7]++;
+    }
+    return goals;
+}
+
 function getWdlDonut(wdl, len) {
     let options = {
         series: wdl,
         chart: {
             type: 'donut',
-            height: 300,
+            height: 350,
             foreColor: '#FFFFFF',
             toolbar: {
                 show: false
@@ -554,7 +925,7 @@ function getWdlDonut(wdl, len) {
             align: 'center'
         },
         legend: {
-            position: 'right',
+            position: 'bottom',
             onItemClick: {
                 toggleDataSeries: true
             },
@@ -627,170 +998,6 @@ function getGoalBar(goalList, len) {
     };
     var chart = new ApexCharts(document.querySelector("#basic-goal-chart"), options);
     chart.render();
-}
-
-function getHTMLMvps(simg, pimg, pname) {
-    return `<figure class="card-image is-128x128">
-                                        <div style="width: fit-content; display: inline-block">
-                                            <img class="is-rounded" src="${pimg}">
-                                            <img style="position: absolute;top: 79%" class="image"
-                                                 src="${simg}">
-                                        </div>
-                                    </figure>
-                                    <p class="is-size-6 has-text-weight-bold">${pname}</p>`;
-}
-
-function getHTMLMatches(basic, owngoals, k) {
-    let mybasic = basic[0];
-    let yourbasic = basic[1];
-    let endtype = ["", "몰수", "몰수"];
-    let resultColor = mybasic.matchResult === "승" ? "#add8e6" : (mybasic.matchResult === "무") ? "#d3d3d3" : "#fcadc8";
-    let controllers = (mybasic.controller === "etc") ? "question" : mybasic.controller;
-    let htmls = `<div id="id-match-${k}" class="has-text-centered has-text-white clas">
-                <div class="card">
-                    <header class="card-header" style="background-color: ${resultColor}">&nbsp;&nbsp;&nbsp;
-                        <p class="card-header-title is-size-4-desktop is-size-6-mobile">
-                            ${endtype[mybasic.matchEndType]}${mybasic.matchResult}
-                        </p>
-                        <span class="card-header-icon has-text-right is-size-5-desktop is-size-7-mobile">${mybasic.matchDate}</span>
-                        <button id="id-match-btn-${k}" class="card-header-icon hovable" aria-label="more options">
-                            <span class="icon">
-                            <i class="fa fa-angle-down" aria-hidden="true"></i>
-                        </span>
-                        </button>
-                    </header>
-                    <div class="card-content">
-                        <div class="content has-text-weight-bold is-size-4-desktop is-size-7-mobile">
-                            <span>
-                                <i class="fa fa-${controllers}"></i>
-                            &nbsp;&nbsp;<span id="uname-${k}-0">${mybasic.nickname}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${mybasic.goalTotal + owngoals[1]} : ${yourbasic.goalTotal + owngoals[0]}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="uname-${k}-1">${yourbasic.nickname}</span>&nbsp;&nbsp;
-                                <i class="fa fa-${controllers}"></i>
-                            </span>
-                        </div>
-                    </div>
-                    <div id="id-match-detail-${k}" class="card-content pl-3 pr-3" style="display: none"></div>
-                </div><br><br>
-            </div>`;
-    $(`#id-container-matchlist`).append(htmls);
-}
-
-
-function getAnalGita() {
-    $('#anal-1').toggle();
-}
-
-function empText(val) {
-    return `<span class="has-text-weight-bold">${val}</span>`;
-}
-
-function dtoReducer(keys, obj) {
-    return obj.reduce(function (pre, cur) {
-        for (let i of keys) {
-            pre[i] += cur[i];
-        }
-        return pre;
-    });
-}
-
-function sortDto(dto, key) {
-    return dto.sort(function (o1, o2) {
-        return o1[key] - o2[key]
-    });
-}
-
-function addPlayerCooc(playerDto) {
-    console.log("과자먹을래?");
-    playerDto.map(value => getPlayerInfo(value.spId)
-        .done(function (result) {
-            setCookie(value.spId, JSON.stringify(result.data), window.location.pathname);
-        }));
-}
-
-function squadHtml(k, idx) {
-    return `
-<div class="column is-mobile" style="background: url(/img/soccerfield.png) no-repeat 0 0;background-size:100% 100%;">
-<div class="columns is-mobile">
-        <div class="column is-one-fifth has-text-centered">&nbsp;</div>
-        <div id="sqd-${k}-${idx}-26" class="column is-one-fifth has-text-centered"></div>
-        <div id="sqd-${k}-${idx}-25" class="column is-one-fifth has-text-centered"></div>
-        <div id="sqd-${k}-${idx}-24" class="column is-one-fifth has-text-centered"></div>
-        <div class="column is-one-fifth has-text-centered">&nbsp;</div>
-</div>
-<div class="columns is-mobile">
-    <div id="sqd-${k}-${idx}-27" class="column is-one-fifth "></div>                                        
-    <div id="sqd-${k}-${idx}-22" class="column is-one-fifth "></div>                                        
-    <div id="sqd-${k}-${idx}-21" class="column is-one-fifth "></div>                                        
-    <div id="sqd-${k}-${idx}-20" class="column is-one-fifth "></div>                                        
-    <div id="sqd-${k}-${idx}-23" class="column is-one-fifth "></div>                                        
-</div>
-<div class="columns is-mobile">
-    <div class="column is-one-fifth"></div>                                        
-    <div id="sqd-${k}-${idx}-19" class="column is-one-fifth "></div>                                        
-    <div id="sqd-${k}-${idx}-18" class="column is-one-fifth "></div>                                        
-    <div id="sqd-${k}-${idx}-17" class="column is-one-fifth "></div>                                        
-    <div class="column is-one-fifth "></div>                                     
-</div>
-<div class="columns is-mobile">
-    <div id="sqd-${k}-${idx}-16" class="column is-one-fifth "></div>                                        
-    <div id="sqd-${k}-${idx}-15" class="column is-one-fifth "></div>                                        
-    <div id="sqd-${k}-${idx}-14" class="column is-one-fifth "></div>                                        
-    <div id="sqd-${k}-${idx}-13" class="column is-one-fifth "></div>                                        
-    <div id="sqd-${k}-${idx}-12" class="column is-one-fifth "></div>
-    </div>
-<div class="columns is-mobile">
-    <div id="sqd-${k}-${idx}-8" class="column is-one-fifth "></div>                                        
-    <div id="sqd-${k}-${idx}-11" class="column is-one-fifth "></div>                                        
-    <div id="sqd-${k}-${idx}-10" class="column is-one-fifth "></div>                                        
-    <div id="sqd-${k}-${idx}-9" class="column is-one-fifth "></div>                                        
-    <div id="sqd-${k}-${idx}-2" class="column is-one-fifth "></div>                                        
-</div>
-<div class="columns is-mobile">
-    <div id="sqd-${k}-${idx}-7" class="column is-one-fifth "></div>                                        
-    <div id="sqd-${k}-${idx}-6" class="column is-one-fifth "></div>                                        
-    <div id="sqd-${k}-${idx}-5" class="column is-one-fifth "></div>                                        
-    <div id="sqd-${k}-${idx}-4" class="column is-one-fifth "></div>                                        
-    <div id="sqd-${k}-${idx}-3" class="column is-one-fifth "></div>                                        
-</div>
-<div class="columns is-mobile">
-    <div class="column is-one-fifth "></div>                                        
-    <div id="sqd-${k}-${idx}-1" class="column is-one-fifth "></div>                                        
-    <div id="sqd-${k}-${idx}-0" class="column is-one-fifth "></div>                                        
-    <div class="column is-one-fifth "></div>                                        
-</div>                      
-</div>
-<div class="has-text-centered has-text-weight-bold is-size-3-desktop is-size-5-mobile mt-1"><p>교체선수</p><hr></div>
-<div id="sqd-${k}-${idx}-28" class="columns is-mobile">
-</div>
-<p id="mobilehovertext-name" class="has-text-weight-bold">&nbsp;</p>`
-}
-
-
-function playerTableHTML(k, idx) {
-    return `<table class="table is-size-6-desktop is-size-7-mobile" style="margin: 0 auto">
-  <thead>
-    <tr>
-      <th class="mytable-no-scroll"><abbr title="선수">PLAYER</abbr></th>
-      <th><abbr title="포지션">POS</abbr></th>
-      <th><abbr title="평점">STAR</abbr><i class="fa fa-angle-down" onclick="tbSorter(${k},${idx},2,this)"></i></th>
-      <th><abbr title="슈팅">SHOT</abbr><i class="fa fa-angle-down" onclick="tbSorter(${k},${idx},3,this)"></i></th>
-      <th><abbr title="유효슈팅">E_SHOT</abbr><i class="fa fa-angle-down" onclick="tbSorter(${k},${idx},4,this)"></i></th>
-      <th><abbr title="득점">GOL</abbr><i class="fa fa-angle-down" onclick="tbSorter(${k},${idx},5,this)"></i></th>
-      <th><abbr title="어시스트">ASI</abbr><i class="fa fa-angle-down" onclick="tbSorter(${k},${idx},6,this)"></i></th>
-      <th><abbr title="패스시도">PAS</abbr><i class="fa fa-angle-down" onclick="tbSorter(${k},${idx},7,this)"></i></th>
-      <th><abbr title="패스성공">S_PAS</abbr><i class="fa fa-angle-down" onclick="tbSorter(${k},${idx},8,this)"></i></th>
-      <th><abbr title="드리블시도">DRIB</abbr><i class="fa fa-angle-down" onclick="tbSorter(${k},${idx},9,this)"></i></th>
-      <th><abbr title="드리블성공">S_DRIB</abbr><i class="fa fa-angle-down" onclick="tbSorter(${k},${idx},10,this)"></i></th>
-      <th><abbr title="가로채기">INCT</abbr></th>
-      <th><abbr title="선방">BLOK</abbr></th>
-      <th><abbr title="태클시도">TAKLE</abbr></th>
-      <th><abbr title="태클성공">S_TAKLE</abbr></th>
-      <th><abbr title="경고">YCARD</abbr></th>
-      <th><abbr title="퇴장">RCARD</abbr></th>
-    </tr>
-  </thead>
-  <tbody id="tbod-${k}-${idx}">
-  </tbody>
-</table>`;
 }
 
 function getMatchHorBar(k, idx, summaryDtoList, keys, myname, yourname) {
@@ -895,7 +1102,7 @@ function getMatchHorBar(k, idx, summaryDtoList, keys, myname, yourname) {
             }
         },
         xaxis: {
-            categories: ['슈팅', '유효슈팅', '코너킥 ', '프리킥 ', '옵사', '파울', '자책골 ', '경고', '퇴장'
+            categories: ['슈팅', '유효슛 ', '코너킥 ', '프리킥 ', '옵사', '파울', '자책골 ', '경고', '퇴장'
             ],
             labels: {
                 show: false
@@ -932,7 +1139,7 @@ function getMatchHorBar(k, idx, summaryDtoList, keys, myname, yourname) {
                         }
                     },
                     chart: {
-                        height: 360
+                        height: 380
                     }
                 }
             }
@@ -940,43 +1147,6 @@ function getMatchHorBar(k, idx, summaryDtoList, keys, myname, yourname) {
     }
     var chart = new ApexCharts(document.querySelector(`#hobar-${k}-${idx}`), options);
     chart.render();
-}
-
-function addPlayerTableData(k, idx, playerDto) {
-    let tableArr = ['spRating', 'shoot', 'effectiveShoot', 'goal', 'assist', 'passTry', 'passSuccess',
-        'dribbleTry', 'dribbleSuccess', 'intercept', 'block', 'tackleTry', 'tackle', 'yellowCards', 'redCards'];
-    let player = playerDto.slice(0, 11);
-    for (let p of player) {
-        let start = `<tr><td class="get-${p.spId}-name mytable-no-scroll has-text-left has-text-weight-bold" style="white-space: nowrap"></td><td class="pos-color-${p.rootPosName}"><small style="background-color: white">${p.posName}</small></td>`;
-        tableArr.map(value => {
-            start += '<td>' + p[value] + '</td>';
-        });
-        $(`#tbod-${k}-${idx}`).append(`${start}</tr>`);
-    }
-}
-
-function tbSorter(k, idx, index, t) {
-    let clas = $(t).attr('class');
-    let sortType = (clas.indexOf('down') === -1) ? 'up' : 'down';
-    var checkSort = true;
-    var target = $(`#tbod-${k}-${idx}`).find('tr');
-    while (checkSort) {
-        checkSort = false;
-        target.each(function (i, row) {
-            if (row.nextSibling == null) return;
-            var fCell = parseFloat(row.cells[index].innerHTML);
-            var sCell = parseFloat(row.nextSibling.cells[index].innerHTML);
-            if (sortType == 'up' && fCell > sCell) {
-                $(row.nextSibling).insertBefore($(row));
-                checkSort = true;
-            }
-            if (sortType == 'down' && fCell < sCell) {
-                $(row.nextSibling).insertBefore($(row));
-                checkSort = true;
-            }
-        });
-    }
-    $(t).attr('class', clas.replace(sortType, (sortType === 'up') ? 'down' : 'up'));
 }
 
 function getPassChart(k, myname, passDto) {
@@ -1136,10 +1306,26 @@ function getPossChart(k, myPo, yourPo, myname, yourname) {
     chart.render();
 }
 
+function makeDiscrete(shootDtoList, idx) {
+    let result = [];
+    let colors = ["#f003fc", "#00c9ff"];
+    for (let i = 0; i < shootDtoList.length; i++) {
+        let buralSize = Math.pow(shootDtoList[i]["prediction"], 1.6) * 15 + 5;
+        result.push({
+            seriesIndex: idx, dataPointIndex: i, size: buralSize.toFixed(2), shape: "circle"
+            , fillColor: (shootDtoList[i]["result"] === 3) ? colors[idx] : ""
+        })
+    }
+    return result;
+}
+
 function getShootChart(k, shootDtoList, myname, yourname) {
     let dtos = [shootDtoList[0].map(v => [(v['x']), v['y']]), shootDtoList[1].map(v => [1 - (v['x']), v['y']])];
     let type = ['', '일반적인 슈팅', '정교한 슈팅', '헤더'];
     let result = ['', '유효슈팅', '벗어나는 슈팅', '득점', '골대맞음'];
+    let disc = makeDiscrete(shootDtoList[0], 0).concat(makeDiscrete(shootDtoList[1], 1));
+    let mobDisc = JSON.parse(JSON.stringify(disc));
+    mobDisc.map(val => val.size = Math.sqrt(val.size) - 0.2);
     var options = {
         series: [
             {
@@ -1180,16 +1366,16 @@ function getShootChart(k, shootDtoList, myname, yourname) {
             }
         },
         fill: {
-            type: ['solid', 'solid'],
+            type: ['solid', 'solid']
         },
-        colors: ['#ff0000', '#ffff00', '#00FF00'],
+        colors: ['#ff0000', '#0211f8', '#00FF00'],
         markers: {
             enabled: true,
             strokeWidth: 0.1,
-            size: [9, 9, 0],
+            discrete: disc,
+            // size: [5,7,0],
             hover: {
-                size: undefined,
-                sizeOffset: 0.5
+                size: 10
             }
         },
         xaxis: {
@@ -1242,7 +1428,8 @@ function getShootChart(k, shootDtoList, myname, yourname) {
                 show: true,
                 formatter: function (series, value) {
                     let curData = shootDtoList[value['seriesIndex']][value['dataPointIndex']];
-                    return [curData.goalTime + '` ' + $(`.get-${curData.spId}-name`)[0].innerText + '\n' + ((curData.hitPost) ? result[4] : result[curData.result])];
+                    let gt = (curData.goalTime >= 0) ? curData.goalTime : "45+" + (-curData.goalTime - 45);
+                    return [gt + '` ' + $(`.get-${curData.spId}-name`)[0].innerText + '\n<br>' + "기대득점(" + curData.prediction.toFixed(2) + ")=>" + ((curData.hitPost) ? result[4] : result[curData.result])];
                 }
             },
             y: {
@@ -1261,7 +1448,10 @@ function getShootChart(k, shootDtoList, myname, yourname) {
                 breakpoint: 480,
                 options: {
                     markers: {
-                        size: [3.5, 3.5, 0]
+                        discrete: mobDisc,
+                        hover: {
+                            size: 3.5
+                        }
                     },
                     legend: {
                         fontSize: '10px'
@@ -1272,14 +1462,6 @@ function getShootChart(k, shootDtoList, myname, yourname) {
                         }
                     }
                 }
-            },
-            {
-                breakpoint: 760,
-                options: {
-                    markers: {
-                        size: [5.5, 5.5, 0]
-                    }
-                }
             }
         ]
     }
@@ -1288,5 +1470,85 @@ function getShootChart(k, shootDtoList, myname, yourname) {
         options.chart.events.dataPointSelection = undefined;
     }
     var chart = new ApexCharts(document.querySelector(`#shoot-all-${k}`), options);
+    chart.render();
+}
+
+function getXgChart(k, shootDto, myname, yourname) {
+    let myXg = shootDto[0].map((v) => [Math.abs(v.goalTime), parseFloat(v.prediction.toFixed(2))]);
+    myXg.map(v => v[1]).reduce(function (x, y, i) {
+        return myXg[i][1] = Math.round((x + y) * 100) / 100;
+    });
+    let yourXg = shootDto[1].map((v) => [Math.abs(v.goalTime), parseFloat(v.prediction.toFixed(2))]);
+    yourXg.map(v => v[1]).reduce(function (x, y, i) {
+        return yourXg[i][1] = Math.round((x + y) * 100) / 100;
+    });
+    let maxTime = Math.max(myXg[myXg.length - 1][0], yourXg[yourXg.length - 1][0]);
+    let maxVal = [myXg[myXg.length - 1][1], yourXg[yourXg.length - 1][1]];
+    let goals = myXg.filter((v,i)=>shootDto[0][i].result===3)
+        .concat(yourXg.filter((v,i)=>shootDto[1][i].result===3));
+    let goalPoints = [];
+    let futbullImage = {path:"/img/futbull.png",width:10,height:10};
+    for(let i = 0 ; i < goals.length; i ++){
+        goalPoints.push({x:goals[i][0],y:goals[i][1],image:futbullImage});
+    }
+    var options = {
+        series: [
+            {
+                name: myname,
+                data: [[0, 0]].concat(myXg).concat([[maxTime + 3, maxVal[0]]])
+            },
+            {
+                name: yourname,
+                data: [[0, 0]].concat(yourXg).concat([[maxTime + 3, maxVal[1]]])
+            }
+        ],
+        chart: {
+            type: 'area',
+            height: 350,
+            stacked: false,
+            toolbar: {
+                show: false
+            }
+        },
+        colors: ['#fb0075', '#0079e3'],
+        dataLabels: {
+            enabled: false
+        },
+        stroke: {
+            curve: 'stepline'
+        },
+        fill: {
+            type: 'gradient',
+            gradient: {
+                opacityFrom: 0.6,
+                opacityTo: 0.8,
+            }
+        },
+        legend: {
+            position: 'top',
+            horizontalAlign: 'center'
+        },
+        xaxis: {
+            type: 'numeric',
+            labels: {
+                formatter: function (value) {
+                    return parseInt(value) + "분";
+                }
+            }
+        },
+        yaxis: {
+            type: 'numeric',
+            labels: {
+                formatter: function (value) {
+                    return (Math.round(value*100)/100)+"XG"
+                }
+            }
+        },
+        annotations: {
+            points: goalPoints
+        }
+    };
+
+    var chart = new ApexCharts(document.querySelector(`#xgchart-${k}`), options);
     chart.render();
 }

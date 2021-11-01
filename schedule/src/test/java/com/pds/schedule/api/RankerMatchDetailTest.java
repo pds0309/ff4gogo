@@ -1,7 +1,7 @@
 package com.pds.schedule.api;
 
 
-import com.pds.common.api.WhoseMatchDetail;
+import com.pds.openapi.api.WhoseMatchDetail;
 import com.pds.schedule.TestMatchDetail;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;

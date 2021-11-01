@@ -1,7 +1,11 @@
 "use strict"
 $(document).ready(function () {
+    $("#id-txt-user").on("keyup",function(key){
+        if(key.keyCode===13) {
+            searchUsers();
+        }
+    });
 
-    //When page loads...
     $(".tab_content.outer").hide(); //Hide all content
     $("ul.tabs.outer li:first").addClass("active").show(); //Activate first tab
     $(".tab_content.outer:first").show(); //Show first tab content
@@ -21,7 +25,7 @@ $(document).ready(function () {
 
 function searchUsers() {
     var name = $('#id-txt-user').val();
-    var username = name.replace(/[^a-zA-z0-9ㄱ-힣]/g,'');
+    var username = name.replace(/[^a-zA-z0-9ㄱ-힣]/g, '');
     $.ajax({
         type: 'POST',
         url: '/users',
@@ -42,15 +46,15 @@ function sendErrorAlert(response) {
     window.alert(code + msg);
 }
 
-function getPlayerInfo(playerid){
+function getPlayerInfo(playerid) {
     return $.ajax({
         type: 'GET',
-        url: `/players?pid=${playerid}`
+        url: `/players/info?pid=${playerid}`
     });
 }
 
-var setCookie = function (name, value , path) {
-    document.cookie = name + '=' + value + ';path='+path;
+var setCookie = function (name, value, path) {
+    document.cookie = name + '=' + value + ';path=' + path;
 };
 var getCookie = function (name) {
     var value = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');

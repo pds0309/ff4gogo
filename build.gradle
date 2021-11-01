@@ -49,9 +49,6 @@ subprojects {
         implementation 'org.springframework.boot:spring-boot-starter-web'
         implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
         compile 'org.json:json:20201115'
-        implementation 'com.oracle.database.jdbc:ojdbc8:19.6.0.0'
-        implementation 'com.oracle.database.jdbc:ucp:19.6.0.0'
-
     }
 
     jacocoTestReport {
@@ -73,13 +70,28 @@ project(':web'){
     dependencies {
         implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
         implementation project(':common')
+        implementation project(':openapi')
+        implementation project(':serverlessapi')
+        implementation 'com.oracle.database.jdbc:ojdbc8:19.6.0.0'
+        implementation 'com.oracle.database.jdbc:ucp:19.6.0.0'
     }
 }
 project(':schedule'){
     dependencies {
         implementation group: 'org.jsoup', name: 'jsoup', version: '1.13.1'
         implementation project(':common')
+        implementation project(':openapi')
+        implementation 'com.oracle.database.jdbc:ojdbc8:19.6.0.0'
+        implementation 'com.oracle.database.jdbc:ucp:19.6.0.0'
     }
+}
+project(':openapi'){
+    bootJar { enabled = false }
+    jar { enabled = true }
+}
+project(':serverlessapi'){
+    bootJar { enabled = false }
+    jar { enabled = true }
 }
 
 

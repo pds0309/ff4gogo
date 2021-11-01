@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface StatRepository extends JpaRepository<Stat, StatId> {
     List<Stat> findTop5ByCntAfterAndStatIdMatchSidIsOrderByCntDesc(int cnt, int sid);
@@ -22,4 +23,14 @@ public interface StatRepository extends JpaRepository<Stat, StatId> {
 
     //select stat0_.match_sid as col_0_0_ from stat stat0_ order by stat0_.match_sid desc limit ?
     StatStatIdMatchSidOnly findTopStatIdMatchSidByOrderByStatIdMatchSidDesc();
+
+
+    /*
+    SELECT * FROM STAT WHERE MATCH_SID = 202111 AND CNT > 10
+    AND (MOST_POS ,STAR) IN (SELECT MOST_POS, MAX(STAR) FROM STAT WHERE MATCH_SID = 202111 AND CNT > 10 GROUP BY MOST_POS);
+     */
+    @Query( nativeQuery = true,value = "SELECT * FROM STAT  WHERE MATCH_SID = :mid AND CNT > :cnt AND (MOST_POS ,STAR) IN " +
+            "(SELECT MOST_POS, MAX(STAR) FROM STAT WHERE MATCH_SID = :mid AND CNT > :cnt GROUP BY MOST_POS)")
+    List<Stat> findTopBest11OneMatchSeason(@Param("mid") int mid , @Param("cnt") int cnt);
+
 }

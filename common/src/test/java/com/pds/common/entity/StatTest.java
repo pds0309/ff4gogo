@@ -42,7 +42,7 @@ class StatTest {
 
     @Test
     void createStatNoStatIdTest(){
-        Stat stat = new Stat(null , 1,2,3,4,5);
+        Stat stat = new Stat(null , 1,2,3,4,5,"","ST");
         assertThrows(PersistenceException.class,()->testEntityManager.persistFlushFind(stat));
     }
 
@@ -50,18 +50,19 @@ class StatTest {
     void createStatTest(){
         StatId statId =
                 new StatId(testEntityManager.find(Player.class,101123),202109);
-        Stat stat = new Stat(statId,1,2,3,4,5);
+        Stat stat = new Stat(statId,1,2,3,4,5,"","ST");
         testEntityManager.persistAndFlush(stat);
         Stat foundStat = statRepository.findById(statId).orElse(null);
         assertEquals(foundStat.getStatId() ,statId);
         assertEquals(foundStat.getStatId().getPlayer().getPlayerId() ,statId.getPlayer().getPlayerId());
         assertEquals(foundStat.getGoal() ,stat.getGoal());
+        assertEquals(foundStat.getMostPos() , stat.getMostPos());
     }
 
     @Test
     void findTop1StatIdOrderByStatIdDescTest(){
-        Stat stat = new Stat(new StatId(testEntityManager.find(Player.class,101123),202109),1,1,1,1,1);
-        Stat stat2 = new Stat(new StatId(testEntityManager.find(Player.class,101123),202108),1,1,1,1,1);
+        Stat stat = new Stat(new StatId(testEntityManager.find(Player.class,101123),202109),1,1,1,1,1,"","ST");
+        Stat stat2 = new Stat(new StatId(testEntityManager.find(Player.class,101123),202108),1,1,1,1,1,"","ST");
         testEntityManager.persistAndFlush(stat);
         testEntityManager.persistAndFlush(stat2);
 
