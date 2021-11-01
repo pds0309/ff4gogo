@@ -1,5 +1,6 @@
 rootProject.name = 'ff4gogo'
 include 'common'
 include 'openapi'
+include 'serverlessapi'
 include 'schedule'
 include 'web'

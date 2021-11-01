@@ -25,7 +25,7 @@ $(document).ready(function () {
                 return new Promise((resolve, reject) => {
                     setTimeout(() => {
                         getMatchDetailList(userid, param)
-                            .done(function (result,textStatus,jqXHR) {
+                            .done(function (result, textStatus, jqXHR) {
                                 if (jqXHR.status !== 204) {
                                     resolve(md[k] = result.data);
                                     resolve(mc[k] = matchList[k]);
@@ -100,7 +100,7 @@ function clickDetail(k, dto) {
                                 <li class="is-active"><a href="#squad-${k}">Squad</a></li>
                                 <li><a href="#match-${k}">경기</a></li>
                                 <li><a href="#player-${k}">선수</a></li>
-                                <li><a href="#shoot-${k}">슛</a></li>
+                                <li id="id-shoot-${k}-li" class="ele-no-react"><a id="id-shoot-${k}" href="#shoot-${k}">슛</a></li>
                             </ul>
                         </div>
                         <div>
@@ -140,19 +140,7 @@ function clickDetail(k, dto) {
     ${playerTableHTML(k, 1)}
 </div>
                             </div>
-                            <div id="shoot-${k}" class="container tab_content inner ${k}">
-<div class="has-text-black is-size-3-desktop is-size-5-mobile has-text-centered has-text-weight-bold">
-<p>슈팅분포</p><hr>
-<p id="shoot-all-warn-${k}" class="is-size-7-mobile has-text-danger"></p>
-</div>
-<div id="shoot-all-${k}" class="has-text-centered is-fullwidth p-0 shootscatter">
-</div>
-<hr>
-<div class="has-text-black is-size-3-desktop is-size-5-mobile has-text-centered has-text-weight-bold">
-<p>기대득점[xG]</p><hr>
-<p class="is-size-5-desktop is-size-7-mobile">준비중입니다!</p>
-</div>
-</div>
+                            <div id="shoot-${k}" class="container tab_content inner ${k}"></div>
                             </div>
                         </div>
                     </div>`);
@@ -166,6 +154,37 @@ function clickDetail(k, dto) {
                 $(`#player-all-${k}-${!status}`).css('display', 'none');
                 $(`#player-all-${k}-${status}`).css('display', 'block');
             });
+            let myShoots = sortDto(dto.shootDtoList[0], "goalTime");
+            let yourShoots = sortDto(dto.shootDtoList[1], "goalTime");
+            let shootDto = [myShoots, yourShoots];
+            getXg(myShoots);
+            getXg(yourShoots);
+            setTimeout( function () {
+                $(`#id-shoot-${k}-li`).removeClass('ele-no-react');
+            }, 1800);
+            $(`#id-shoot-${k}`).click(function () {
+                if ($(`#shoot-${k}`).text().length === 0) {
+                    $(`#shoot-${k}`).append(`
+                        <div class="has-text-black is-size-3-desktop is-size-5-mobile has-text-centered has-text-weight-bold">
+                            <p>슈팅분포</p>
+                            <hr>
+                                <p id="shoot-all-warn-${k}" class="is-size-7-mobile has-text-danger"></p>
+                        </div>
+                    <div id="shoot-all-${k}" class="has-text-centered is-fullwidth p-0 shootscatter">
+                    </div>
+                    <hr>
+                        <div class="has-text-black is-size-3-desktop is-size-5-mobile has-text-centered has-text-weight-bold">
+                            <p>경기기대득점[XG] 추이</p>
+                            <hr>
+                                <p id="xgchart-${k}" class="is-size-5-desktop is-size-7-mobile"></p>
+                        </div>`
+                    );
+                    setTimeout( function () {
+                        getShootChart(k, shootDto, myname, yourname);
+                        getXgChart(k, shootDto, myname, yourname);
+                    }, 200);
+                }
+            });
             getOneMatchInfo(dto, k);
             let mySummary = dto.summaryDtoList[0];
             let yourSummary = dto.summaryDtoList[1];
@@ -176,7 +195,6 @@ function clickDetail(k, dto) {
             getMatchHorBar(k, 0, dto.summaryDtoList, sumarryKeys, myname, yourname);
             getPossChart(k, mySummary["possession"], yourSummary["possession"], myname, yourname);
             getPassChart(k, myname, dto.passDtoList[0]);
-            getShootChart(k, dto.shootDtoList, myname, yourname);
             let pIdSet = new Set();
             dto.matchPlayerDtoList.map(value => value.forEach(function (item) {
                 let cook = getCookie(item.spId);
@@ -194,22 +212,53 @@ function clickDetail(k, dto) {
                         addClasForPlayer(player);
                     })
             )
+            $(`.tab_content.inner.${k}`).hide(); //Hide all content
+            $(`#squad-${k}`).addClass("active").show(); //Activate first tab
+            $(`#squad-${k}`).show(); //Show first tab content
+            $(`ul.tabs.inner.${k} li`).click(function () {
+                $(`ul.tabs.inner.${k} li`).removeClass("is-active"); //Remove any "active" class
+                $(this).addClass("is-active"); //Add "active" class to selected tab
+                $(`.tab_content.inner.${k}`).hide(); //Hide all tab content
+                var activeTab = $(this).find("a").attr("href"); //Find the href attribute value to identify the active tab + content
+                $(activeTab).fadeIn(); //Fade in the active ID content
+                return false;
+            });
         }
-        $(`.tab_content.inner.${k}`).hide(); //Hide all content
-        $(`#squad-${k}`).addClass("active").show(); //Activate first tab
-        $(`#squad-${k}`).show(); //Show first tab content
-        $(`ul.tabs.inner.${k} li`).click(function () {
-            $(`ul.tabs.inner.${k} li`).removeClass("is-active"); //Remove any "active" class
-            $(this).addClass("is-active"); //Add "active" class to selected tab
-            $(`.tab_content.inner.${k}`).hide(); //Hide all tab content
-            var activeTab = $(this).find("a").attr("href"); //Find the href attribute value to identify the active tab + content
-            $(activeTab).fadeIn(); //Fade in the active ID content
-            return false;
-        });
     } else {
         detailDiv.style.display = "none";
     }
 }
+
+function getXg(shootdtoList) {
+    for (let i = 0; i < shootdtoList.length; i++) {
+        let shotType = [0, 0, 0, 0];
+        shotType[shootdtoList[i]["type"]] = 1;
+        let shootInfo = {
+            assist: (shootdtoList[i]["assist"]) ? 1 : 0,
+            asx: shootdtoList[i]["assistX"],
+            asy: shootdtoList[i]["assistY"],
+            inv: (i === 0) ? shootdtoList[i]["goalTime"] : shootdtoList[i]["goalTime"] - shootdtoList[i - 1]["goalTime"],
+            x: shootdtoList[i]["x"],
+            y: shootdtoList[i]["y"],
+            nom: shotType[1],
+            fin: shotType[2],
+            hed: shotType[3]
+        }
+        $.ajax({
+            type: 'POST',
+            url: '/expectedgoal',
+            contentType: 'application/json',
+            data: JSON.stringify(shootInfo),
+            success: function (response) {
+                shootdtoList[i].prediction = response["prediction"];
+            },
+            error: function (response) {
+                shootdtoList[i].prediction = 0;
+            }
+        });
+    }
+}
+
 
 function addClasForPlayer(player) {
     let pId = player.info.playerId;
@@ -236,7 +285,7 @@ function putGoalInfo(shootDto, k, idx) {
     for (let obj of shootDto) {
         if (obj.result === 3) {
             let gt = obj.goalTime;
-            gt = (gt >= 0 ) ? gt : '45+'+(-gt - 45);
+            gt = (gt >= 0) ? gt : '45+' + (-gt - 45);
             $(`#match-goals-${k}-${idx}`).append(`
             <small><i class="fa fa-futbol"></i>&nbsp;${gt}'<span class="get-${obj.spId}-name"></span></small><br>`);
         }
@@ -323,7 +372,7 @@ function getMoreMatch(id) {
         return new Promise((resolve) => {
             setTimeout(() => {
                 getMatchDetailList(id, newMatchList[k])
-                    .done(function (result,textStatus,jqXHR) {
+                    .done(function (result, textStatus, jqXHR) {
                         if (jqXHR.status !== 204) {
                             resolve(result.data);
                         } else {
@@ -437,115 +486,6 @@ function getSummaryInfo(userid, dtos) {
     getAnalPass(yourPass, idx, [2, 1, 0], "허용");
 }
 
-function decideGoalTime(goalTime) {
-    let goals = [0, 0, 0, 0, 0, 0, 0, 0];
-    for (let i = 0; i < goalTime.length; i++) {
-        if (goalTime[i] < 0) {
-            goals[3]++;
-            continue;
-        }
-        if (goalTime[i] < 15) {
-            goals[0]++;
-            continue;
-        }
-        if (goalTime[i] < 30) {
-            goals[1]++;
-            continue;
-        }
-        if (goalTime[i] < 45) {
-            goals[2]++;
-            continue;
-        }
-        if (goalTime[i] < 60) {
-            goals[4]++;
-            continue;
-        }
-        if (goalTime[i] < 75) {
-            goals[5]++;
-            continue;
-        }
-        if (goalTime[i] < 90) {
-            goals[6]++;
-            continue;
-        }
-        goals[7]++;
-    }
-    return goals;
-}
-
-function getGoalTimeBar(myGoaltime, yourGoaltime) {
-    let mygoals = decideGoalTime(myGoaltime);
-    let yourgoals = decideGoalTime(yourGoaltime);
-    var options = {
-        series: [{
-            name: '득점',
-            data: mygoals
-        }, {
-            name: '실점',
-            data: yourgoals
-        }],
-        chart: {
-            type: 'bar',
-            foreColor: '#FFFFFF',
-            toolbar: {
-                show: false
-            },
-            height: 300
-        },
-        plotOptions: {
-            bar: {
-                borderRadius: 4,
-                horizontal: false,
-                columnWidth: '55%',
-                endingShape: 'rounded'
-            },
-        },
-        dataLabels: {
-            enabled: false
-        },
-        colors: ['#468af6', '#de5d5d'],
-        stroke: {
-            show: true,
-            width: 2,
-            colors: ['transparent']
-        },
-        xaxis: {
-            categories: ['0-15', '15-30', '30-45', '45++', '45-60', '60-75', '75-90', '90++'],
-        },
-        yaxis: {
-            labels: {
-                show: false
-            }
-        },
-        grid: {
-            show: false
-        },
-        fill: {
-            opacity: 1
-        },
-        tooltip: {
-            theme: 'dark',
-            x: {
-                show: true
-            },
-            y: {
-                title: {
-                    formatter: function () {
-                        return '';
-                    }
-                }
-            }
-        },
-        title: {
-            text: `득/실 시간분포`,
-            align: 'center'
-        }
-    };
-
-    var chart = new ApexCharts(document.querySelector("#basic-gtime-chart"), options);
-    chart.render();
-}
-
 function getAnalPass(passList, idx, arr, msg) {
     let allPass = passList["passTry"];
     //glass-martini-alt
@@ -654,98 +594,6 @@ function yourStar(bestdto) {
             let player = result.data;
             $('#mvp-star').append(`${getHTMLMvps(player.info.season.img, player.pimg, player.info.playerName)}<p><span class="has-text-danger has-text-weight-bold">${max.cnt}경기 ${Math.round(max.spRating * 100) / 100} 평점</p>`);
         });
-}
-
-function getWdlDonut(wdl, len) {
-    let options = {
-        series: wdl,
-        chart: {
-            type: 'donut',
-            height: 350,
-            foreColor: '#FFFFFF',
-            toolbar: {
-                show: false
-            }
-        },
-        labels: ["승", "무", "패"],
-        title: {
-            text: `${len}경기 ${wdl[0]}승 ${wdl[1]}무 ${wdl[2]}패`,
-            align: 'center'
-        },
-        legend: {
-            position: 'bottom',
-            onItemClick: {
-                toggleDataSeries: true
-            },
-            onItemHover: {
-                highlightDataSeries: true
-            },
-            offsetY: 0,
-            offsetX: 0
-        }
-    };
-    let chart = new ApexCharts(document.querySelector("#basic-win-chart"), options);
-    chart.render();
-}
-
-function getGoalBar(goalList, len) {
-    var options = {
-        series: [{
-            data: goalList
-        }],
-        chart: {
-            type: 'bar',
-            foreColor: '#FFFFFF',
-            toolbar: {
-                show: false
-            },
-            height: 300
-        },
-        plotOptions: {
-            bar: {
-                borderRadius: 4,
-                horizontal: false,
-                distributed: true
-            }
-        },
-        dataLabels: {
-            enabled: true,
-            style: {
-                fontSize: "1.5em"
-            }
-        },
-        colors: ['#468af6', '#de5d5d'],
-        xaxis: {
-            categories: ['득점', '실점'],
-        },
-        yaxis: {
-            labels: {
-                show: false
-            }
-        },
-        grid: {
-            show: false
-        },
-        title: {
-            text: `${len} 경기 득/실점`,
-            align: 'center'
-        },
-        tooltip: {
-            theme: 'dark',
-            x: {
-                show: true
-            },
-            y: {
-                title: {
-                    formatter: function () {
-                        return ''
-                    }
-                }
-            }
-        }
-    };
-    var chart = new ApexCharts(document.querySelector("#basic-goal-chart"), options);
-    chart.render();
 }
 
 function getHTMLMvps(simg, pimg, pname) {
@@ -880,7 +728,7 @@ function squadHtml(k, idx) {
 <div class="has-text-centered has-text-weight-bold is-size-3-desktop is-size-5-mobile mt-1"><p>교체선수</p><hr></div>
 <div id="sqd-${k}-${idx}-28" class="columns is-mobile">
 </div>
-<p id="mobilehovertext-name-${k}-${idx}" class="has-text-weight-bold">&nbsp;</p>`
+<p id="mobilehovertext-name-${k}-${idx}" class="has-text-weight-bold mobilehovertext-name">&nbsp;</p>`
 }
 
 
@@ -910,6 +758,246 @@ function playerTableHTML(k, idx) {
   <tbody id="tbod-${k}-${idx}">
   </tbody>
 </table>`;
+}
+
+
+
+function addPlayerTableData(k, idx, playerDto) {
+    let tableArr = ['spRating', 'shoot', 'effectiveShoot', 'goal', 'assist', 'passTry', 'passSuccess',
+        'dribbleTry', 'dribbleSuccess', 'intercept', 'block', 'tackleTry', 'tackle', 'yellowCards', 'redCards'];
+    let player = playerDto.slice(0, 11);
+    for (let p of player) {
+        let start = `<tr><td class="get-${p.spId}-name mytable-no-scroll has-text-left has-text-weight-bold" style="white-space: nowrap"></td><td class="pos-color-${p.rootPosName}"><small style="background-color: white">${p.posName}</small></td>`;
+        tableArr.map(value => {
+            start += '<td>' + p[value] + '</td>';
+        });
+        $(`#tbod-${k}-${idx}`).append(`${start}</tr>`);
+    }
+}
+
+function tbSorter(k, idx, index, t) {
+    let clas = $(t).attr('class');
+    let sortType = (clas.indexOf('down') === -1) ? 'up' : 'down';
+    var checkSort = true;
+    var target = $(`#tbod-${k}-${idx}`).find('tr');
+    while (checkSort) {
+        checkSort = false;
+        target.each(function (i, row) {
+            if (row.nextSibling == null) return;
+            var fCell = parseFloat(row.cells[index].innerHTML);
+            var sCell = parseFloat(row.nextSibling.cells[index].innerHTML);
+            if (sortType == 'up' && fCell > sCell) {
+                $(row.nextSibling).insertBefore($(row));
+                checkSort = true;
+            }
+            if (sortType == 'down' && fCell < sCell) {
+                $(row.nextSibling).insertBefore($(row));
+                checkSort = true;
+            }
+        });
+    }
+    $(t).attr('class', clas.replace(sortType, (sortType === 'up') ? 'down' : 'up'));
+}
+
+
+function getGoalTimeBar(myGoaltime, yourGoaltime) {
+    let mygoals = decideGoalTime(myGoaltime);
+    let yourgoals = decideGoalTime(yourGoaltime);
+    var options = {
+        series: [{
+            name: '득점',
+            data: mygoals
+        }, {
+            name: '실점',
+            data: yourgoals
+        }],
+        chart: {
+            type: 'bar',
+            foreColor: '#FFFFFF',
+            toolbar: {
+                show: false
+            },
+            height: 300
+        },
+        plotOptions: {
+            bar: {
+                borderRadius: 4,
+                horizontal: false,
+                columnWidth: '55%',
+                endingShape: 'rounded'
+            },
+        },
+        dataLabels: {
+            enabled: false
+        },
+        colors: ['#468af6', '#de5d5d'],
+        stroke: {
+            show: true,
+            width: 2,
+            colors: ['transparent']
+        },
+        xaxis: {
+            categories: ['0-15', '15-30', '30-45', '45++', '45-60', '60-75', '75-90', '90++'],
+        },
+        yaxis: {
+            labels: {
+                show: false
+            }
+        },
+        grid: {
+            show: false
+        },
+        fill: {
+            opacity: 1
+        },
+        tooltip: {
+            theme: 'dark',
+            x: {
+                show: true
+            },
+            y: {
+                title: {
+                    formatter: function () {
+                        return '';
+                    }
+                }
+            }
+        },
+        title: {
+            text: `득/실 시간분포`,
+            align: 'center'
+        }
+    };
+
+    var chart = new ApexCharts(document.querySelector("#basic-gtime-chart"), options);
+    chart.render();
+}
+function decideGoalTime(goalTime) {
+    let goals = [0, 0, 0, 0, 0, 0, 0, 0];
+    for (let i = 0; i < goalTime.length; i++) {
+        if (goalTime[i] < 0) {
+            goals[3]++;
+            continue;
+        }
+        if (goalTime[i] < 15) {
+            goals[0]++;
+            continue;
+        }
+        if (goalTime[i] < 30) {
+            goals[1]++;
+            continue;
+        }
+        if (goalTime[i] < 45) {
+            goals[2]++;
+            continue;
+        }
+        if (goalTime[i] < 60) {
+            goals[4]++;
+            continue;
+        }
+        if (goalTime[i] < 75) {
+            goals[5]++;
+            continue;
+        }
+        if (goalTime[i] < 90) {
+            goals[6]++;
+            continue;
+        }
+        goals[7]++;
+    }
+    return goals;
+}
+
+function getWdlDonut(wdl, len) {
+    let options = {
+        series: wdl,
+        chart: {
+            type: 'donut',
+            height: 350,
+            foreColor: '#FFFFFF',
+            toolbar: {
+                show: false
+            }
+        },
+        labels: ["승", "무", "패"],
+        title: {
+            text: `${len}경기 ${wdl[0]}승 ${wdl[1]}무 ${wdl[2]}패`,
+            align: 'center'
+        },
+        legend: {
+            position: 'bottom',
+            onItemClick: {
+                toggleDataSeries: true
+            },
+            onItemHover: {
+                highlightDataSeries: true
+            },
+            offsetY: 0,
+            offsetX: 0
+        }
+    };
+    let chart = new ApexCharts(document.querySelector("#basic-win-chart"), options);
+    chart.render();
+}
+
+function getGoalBar(goalList, len) {
+    var options = {
+        series: [{
+            data: goalList
+        }],
+        chart: {
+            type: 'bar',
+            foreColor: '#FFFFFF',
+            toolbar: {
+                show: false
+            },
+            height: 300
+        },
+        plotOptions: {
+            bar: {
+                borderRadius: 4,
+                horizontal: false,
+                distributed: true
+            }
+        },
+        dataLabels: {
+            enabled: true,
+            style: {
+                fontSize: "1.5em"
+            }
+        },
+        colors: ['#468af6', '#de5d5d'],
+        xaxis: {
+            categories: ['득점', '실점'],
+        },
+        yaxis: {
+            labels: {
+                show: false
+            }
+        },
+        grid: {
+            show: false
+        },
+        title: {
+            text: `${len} 경기 득/실점`,
+            align: 'center'
+        },
+        tooltip: {
+            theme: 'dark',
+            x: {
+                show: true
+            },
+            y: {
+                title: {
+                    formatter: function () {
+                        return ''
+                    }
+                }
+            }
+        }
+    };
+    var chart = new ApexCharts(document.querySelector("#basic-goal-chart"), options);
+    chart.render();
 }
 
 function getMatchHorBar(k, idx, summaryDtoList, keys, myname, yourname) {
@@ -1059,43 +1147,6 @@ function getMatchHorBar(k, idx, summaryDtoList, keys, myname, yourname) {
     }
     var chart = new ApexCharts(document.querySelector(`#hobar-${k}-${idx}`), options);
     chart.render();
-}
-
-function addPlayerTableData(k, idx, playerDto) {
-    let tableArr = ['spRating', 'shoot', 'effectiveShoot', 'goal', 'assist', 'passTry', 'passSuccess',
-        'dribbleTry', 'dribbleSuccess', 'intercept', 'block', 'tackleTry', 'tackle', 'yellowCards', 'redCards'];
-    let player = playerDto.slice(0, 11);
-    for (let p of player) {
-        let start = `<tr><td class="get-${p.spId}-name mytable-no-scroll has-text-left has-text-weight-bold" style="white-space: nowrap"></td><td class="pos-color-${p.rootPosName}"><small style="background-color: white">${p.posName}</small></td>`;
-        tableArr.map(value => {
-            start += '<td>' + p[value] + '</td>';
-        });
-        $(`#tbod-${k}-${idx}`).append(`${start}</tr>`);
-    }
-}
-
-function tbSorter(k, idx, index, t) {
-    let clas = $(t).attr('class');
-    let sortType = (clas.indexOf('down') === -1) ? 'up' : 'down';
-    var checkSort = true;
-    var target = $(`#tbod-${k}-${idx}`).find('tr');
-    while (checkSort) {
-        checkSort = false;
-        target.each(function (i, row) {
-            if (row.nextSibling == null) return;
-            var fCell = parseFloat(row.cells[index].innerHTML);
-            var sCell = parseFloat(row.nextSibling.cells[index].innerHTML);
-            if (sortType == 'up' && fCell > sCell) {
-                $(row.nextSibling).insertBefore($(row));
-                checkSort = true;
-            }
-            if (sortType == 'down' && fCell < sCell) {
-                $(row.nextSibling).insertBefore($(row));
-                checkSort = true;
-            }
-        });
-    }
-    $(t).attr('class', clas.replace(sortType, (sortType === 'up') ? 'down' : 'up'));
 }
 
 function getPassChart(k, myname, passDto) {
@@ -1255,10 +1306,26 @@ function getPossChart(k, myPo, yourPo, myname, yourname) {
     chart.render();
 }
 
+function makeDiscrete(shootDtoList, idx) {
+    let result = [];
+    let colors = ["#f003fc", "#00c9ff"];
+    for (let i = 0; i < shootDtoList.length; i++) {
+        let buralSize = Math.pow(shootDtoList[i]["prediction"], 1.6) * 15 + 5;
+        result.push({
+            seriesIndex: idx, dataPointIndex: i, size: buralSize.toFixed(2), shape: "circle"
+            , fillColor: (shootDtoList[i]["result"] === 3) ? colors[idx] : ""
+        })
+    }
+    return result;
+}
+
 function getShootChart(k, shootDtoList, myname, yourname) {
     let dtos = [shootDtoList[0].map(v => [(v['x']), v['y']]), shootDtoList[1].map(v => [1 - (v['x']), v['y']])];
     let type = ['', '일반적인 슈팅', '정교한 슈팅', '헤더'];
     let result = ['', '유효슈팅', '벗어나는 슈팅', '득점', '골대맞음'];
+    let disc = makeDiscrete(shootDtoList[0], 0).concat(makeDiscrete(shootDtoList[1], 1));
+    let mobDisc = JSON.parse(JSON.stringify(disc));
+    mobDisc.map(val => val.size = Math.sqrt(val.size) - 0.2);
     var options = {
         series: [
             {
@@ -1299,16 +1366,16 @@ function getShootChart(k, shootDtoList, myname, yourname) {
             }
         },
         fill: {
-            type: ['solid', 'solid'],
+            type: ['solid', 'solid']
         },
-        colors: ['#ff0000', '#ffff00', '#00FF00'],
+        colors: ['#ff0000', '#0211f8', '#00FF00'],
         markers: {
             enabled: true,
             strokeWidth: 0.1,
-            size: [9, 9, 0],
+            discrete: disc,
+            // size: [5,7,0],
             hover: {
-                size: undefined,
-                sizeOffset: 0.5
+                size: 10
             }
         },
         xaxis: {
@@ -1362,7 +1429,7 @@ function getShootChart(k, shootDtoList, myname, yourname) {
                 formatter: function (series, value) {
                     let curData = shootDtoList[value['seriesIndex']][value['dataPointIndex']];
                     let gt = (curData.goalTime >= 0) ? curData.goalTime : "45+" + (-curData.goalTime - 45);
-                    return [gt + '` ' + $(`.get-${curData.spId}-name`)[0].innerText + '\n' + ((curData.hitPost) ? result[4] : result[curData.result])];
+                    return [gt + '` ' + $(`.get-${curData.spId}-name`)[0].innerText + '\n<br>' + "기대득점(" + curData.prediction.toFixed(2) + ")=>" + ((curData.hitPost) ? result[4] : result[curData.result])];
                 }
             },
             y: {
@@ -1381,7 +1448,10 @@ function getShootChart(k, shootDtoList, myname, yourname) {
                 breakpoint: 480,
                 options: {
                     markers: {
-                        size: [3.5, 3.5, 0]
+                        discrete: mobDisc,
+                        hover: {
+                            size: 3.5
+                        }
                     },
                     legend: {
                         fontSize: '10px'
@@ -1392,14 +1462,6 @@ function getShootChart(k, shootDtoList, myname, yourname) {
                         }
                     }
                 }
-            },
-            {
-                breakpoint: 760,
-                options: {
-                    markers: {
-                        size: [5.5, 5.5, 0]
-                    }
-                }
             }
         ]
     }
@@ -1408,5 +1470,85 @@ function getShootChart(k, shootDtoList, myname, yourname) {
         options.chart.events.dataPointSelection = undefined;
     }
     var chart = new ApexCharts(document.querySelector(`#shoot-all-${k}`), options);
+    chart.render();
+}
+
+function getXgChart(k, shootDto, myname, yourname) {
+    let myXg = shootDto[0].map((v) => [Math.abs(v.goalTime), parseFloat(v.prediction.toFixed(2))]);
+    myXg.map(v => v[1]).reduce(function (x, y, i) {
+        return myXg[i][1] = Math.round((x + y) * 100) / 100;
+    });
+    let yourXg = shootDto[1].map((v) => [Math.abs(v.goalTime), parseFloat(v.prediction.toFixed(2))]);
+    yourXg.map(v => v[1]).reduce(function (x, y, i) {
+        return yourXg[i][1] = Math.round((x + y) * 100) / 100;
+    });
+    let maxTime = Math.max(myXg[myXg.length - 1][0], yourXg[yourXg.length - 1][0]);
+    let maxVal = [myXg[myXg.length - 1][1], yourXg[yourXg.length - 1][1]];
+    let goals = myXg.filter((v,i)=>shootDto[0][i].result===3)
+        .concat(yourXg.filter((v,i)=>shootDto[1][i].result===3));
+    let goalPoints = [];
+    let futbullImage = {path:"/img/futbull.png",width:10,height:10};
+    for(let i = 0 ; i < goals.length; i ++){
+        goalPoints.push({x:goals[i][0],y:goals[i][1],image:futbullImage});
+    }
+    var options = {
+        series: [
+            {
+                name: myname,
+                data: [[0, 0]].concat(myXg).concat([[maxTime + 3, maxVal[0]]])
+            },
+            {
+                name: yourname,
+                data: [[0, 0]].concat(yourXg).concat([[maxTime + 3, maxVal[1]]])
+            }
+        ],
+        chart: {
+            type: 'area',
+            height: 350,
+            stacked: false,
+            toolbar: {
+                show: false
+            }
+        },
+        colors: ['#fb0075', '#0079e3'],
+        dataLabels: {
+            enabled: false
+        },
+        stroke: {
+            curve: 'stepline'
+        },
+        fill: {
+            type: 'gradient',
+            gradient: {
+                opacityFrom: 0.6,
+                opacityTo: 0.8,
+            }
+        },
+        legend: {
+            position: 'top',
+            horizontalAlign: 'center'
+        },
+        xaxis: {
+            type: 'numeric',
+            labels: {
+                formatter: function (value) {
+                    return parseInt(value) + "분";
+                }
+            }
+        },
+        yaxis: {
+            type: 'numeric',
+            labels: {
+                formatter: function (value) {
+                    return (Math.round(value*100)/100)+"XG"
+                }
+            }
+        },
+        annotations: {
+            points: goalPoints
+        }
+    };
+
+    var chart = new ApexCharts(document.querySelector(`#xgchart-${k}`), options);
     chart.render();
 }
