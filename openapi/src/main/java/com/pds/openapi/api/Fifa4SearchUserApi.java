@@ -6,6 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
@@ -26,6 +27,9 @@ public class Fifa4SearchUserApi {
             return responseEntity.getBody();
         }
         catch(HttpClientErrorException e){
+            if(e.getRawStatusCode()==400){
+                throw new HttpClientErrorException(HttpStatus.FORBIDDEN,"FION4 API ");
+            }
             return null;
         }
     }

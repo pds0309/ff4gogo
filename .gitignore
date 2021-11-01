@@ -38,3 +38,4 @@ out/
 
 
 openapi/src/main/resources/application-apikey.properties
+serverlessapi/src/main/resources/application-skey.properties
