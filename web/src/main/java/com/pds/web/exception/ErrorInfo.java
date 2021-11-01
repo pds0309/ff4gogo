@@ -5,13 +5,16 @@ import lombok.Getter;
 
 @Getter
 public enum ErrorInfo {
-    //BAD_REQUEST
+    //BAD_REQUEST 너의 잘못이다.
     USER_DATA_NOT_EXIST(-101, "존재하지 않는 유저입니다."),
     USER_BAD_ACCESS(-102 , "잘못된 방식의 접근입니다. 정상적인 방법으로 조회해주세요"),
     PARAMETER_INVALID(-103, "잘못된 입력값이 식별되었습니다."),
     METHOD_INVALID(-104,"잘못된 방법의 요청입니다."),
-        //종종 몰수경기 등으로 인한 매치 데이터 누락, 경기 정보 없음 및 유저 ID가 존재하지 않는 오류 발생함.
+    //종종 몰수경기 등으로 인한 매치 데이터 누락, 경기 정보 없음 및 유저 ID가 존재하지 않는 오류 발생함.
     FF4_API_ERROR(-301 , "FION4 Open-API 메타 데이터가 비정상적입니다. 해당 데이터를 수집하지 않았습니다."),
+
+    //서버자체에서 API와 통신이 불가능한 경우 예) 키 잘못됨 -> INTERNAL_SERVER_ERROR
+    FF4_API_CANNOT_READ(-305 , " 조회가 불가능합니다. 관리자에게 문의해주세요"),
 
     DB_DATA_ERROR(-601, "요청된 데이터가 존재하지 않습니다."),
 
