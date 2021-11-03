@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -21,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.filter.CharacterEncodingFilter;
 
 import java.nio.charset.StandardCharsets;
@@ -121,6 +123,14 @@ class UserSearchControllerTest {
                         .andExpect(model().attribute("rank", Ranks.getRanks(infoDto.getHighRank()).getRankInfo()))
                         .andReturn();
         assertEquals(infoDto, mvcResult.getModelAndView().getModel().get("user"));
+    }
+    @Test
+    void getUserInvalidTest() throws Exception{
+        given(userSearchService.getUserInfo("ID")).willThrow(new HttpClientErrorException(HttpStatus.FORBIDDEN));
+        mvc.perform(get("/users/{id}","ID"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(result -> assertEquals(HttpClientErrorException.class,getApiResultExceptionClass(result)))
+                .andReturn();
     }
 
     @Test
