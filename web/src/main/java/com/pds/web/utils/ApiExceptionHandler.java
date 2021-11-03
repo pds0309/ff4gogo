@@ -83,6 +83,15 @@ public class ApiExceptionHandler{
                 message, errorInfo.getErrorCode(), status, null, request.getRequestURI());
     }
 
+    @ExceptionHandler(value = {IllegalArgumentException.class})
+    public ResponseEntity<Object> handleIlligalArgException(IllegalArgumentException e , HttpServletRequest request){
+        basicLogs(request);
+        simpleExceptionLog(e);
+        return ResponseHandler.generateResponse(
+                e.getMessage(),ErrorInfo.METHOD_INVALID.getErrorCode(),HttpStatus.BAD_REQUEST,null, request.getRequestURI()
+        );
+    }
+
     //TODO 향후 해당 예외 발견될 경우 따로 예외 처리한다.
     @ExceptionHandler(value = {Exception.class})
     public ModelAndView handleAllException(final Exception e, HttpServletRequest request){
