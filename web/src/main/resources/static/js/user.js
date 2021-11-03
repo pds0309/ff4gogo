@@ -157,11 +157,9 @@ function clickDetail(k, dto) {
             let myShoots = sortDto(dto.shootDtoList[0], "goalTime");
             let yourShoots = sortDto(dto.shootDtoList[1], "goalTime");
             let shootDto = [myShoots, yourShoots];
-            getXg(myShoots);
-            getXg(yourShoots);
-            setTimeout( function () {
-                $(`#id-shoot-${k}-li`).removeClass('ele-no-react');
-            }, 1800);
+
+            getXg(transShootListForXg(myShoots) , myShoots , k);
+            getXg(transShootListForXg(yourShoots) , yourShoots, k);
             $(`#id-shoot-${k}`).click(function () {
                 if ($(`#shoot-${k}`).text().length === 0) {
                     $(`#shoot-${k}`).append(`
@@ -179,7 +177,7 @@ function clickDetail(k, dto) {
                                 <p id="xgchart-${k}" class="is-size-5-desktop is-size-7-mobile"></p>
                         </div>`
                     );
-                    setTimeout( function () {
+                    setTimeout(function () {
                         getShootChart(k, shootDto, myname, yourname);
                         getXgChart(k, shootDto, myname, yourname);
                     }, 200);
@@ -229,7 +227,8 @@ function clickDetail(k, dto) {
     }
 }
 
-function getXg(shootdtoList) {
+function transShootListForXg(shootdtoList){
+    let shootInfoList = {"inner": []};
     for (let i = 0; i < shootdtoList.length; i++) {
         let shotType = [0, 0, 0, 0];
         shotType[shootdtoList[i]["type"]] = 1;
@@ -244,19 +243,27 @@ function getXg(shootdtoList) {
             fin: shotType[2],
             hed: shotType[3]
         }
-        $.ajax({
-            type: 'POST',
-            url: '/expectedgoal',
-            contentType: 'application/json',
-            data: JSON.stringify(shootInfo),
-            success: function (response) {
-                shootdtoList[i].prediction = response["prediction"];
-            },
-            error: function (response) {
-                shootdtoList[i].prediction = 0;
-            }
-        });
+        shootInfoList["inner"].push(shootInfo);
     }
+    return shootInfoList;
+}
+
+function getXg(shootInfoList , shootdtoList , k) {
+    $.ajax({
+        type: 'POST',
+        url: '/expectedgoals',
+        contentType: 'application/json',
+        data: JSON.stringify(shootInfoList),
+        success: function (response) {
+            shootdtoList.map((v,i)=>v.prediction = response[i]["prediction"]);
+            if($(`#id-shoot-${k}-li`).hasClass('ele-no-react')){
+                setTimeout(function () {
+                    $(`#id-shoot-${k}-li`).removeClass('ele-no-react');
+                }, 200);
+            }
+        }
+    });
+
 }
 
 
@@ -761,7 +768,6 @@ function playerTableHTML(k, idx) {
 }
 
 
-
 function addPlayerTableData(k, idx, playerDto) {
     let tableArr = ['spRating', 'shoot', 'effectiveShoot', 'goal', 'assist', 'passTry', 'passSuccess',
         'dribbleTry', 'dribbleSuccess', 'intercept', 'block', 'tackleTry', 'tackle', 'yellowCards', 'redCards'];
@@ -872,6 +878,7 @@ function getGoalTimeBar(myGoaltime, yourGoaltime) {
     var chart = new ApexCharts(document.querySelector("#basic-gtime-chart"), options);
     chart.render();
 }
+
 function decideGoalTime(goalTime) {
     let goals = [0, 0, 0, 0, 0, 0, 0, 0];
     for (let i = 0; i < goalTime.length; i++) {
@@ -1310,7 +1317,7 @@ function makeDiscrete(shootDtoList, idx) {
     let result = [];
     let colors = ["#f003fc", "#00c9ff"];
     for (let i = 0; i < shootDtoList.length; i++) {
-        let buralSize = Math.pow(shootDtoList[i]["prediction"], 1.6) * 15 + 5;
+        let buralSize = Math.pow(shootDtoList[i]["prediction"], 1.6) * 15 + 5.3;
         result.push({
             seriesIndex: idx, dataPointIndex: i, size: buralSize.toFixed(2), shape: "circle"
             , fillColor: (shootDtoList[i]["result"] === 3) ? colors[idx] : ""
@@ -1484,12 +1491,12 @@ function getXgChart(k, shootDto, myname, yourname) {
     });
     let maxTime = Math.max(myXg[myXg.length - 1][0], yourXg[yourXg.length - 1][0]);
     let maxVal = [myXg[myXg.length - 1][1], yourXg[yourXg.length - 1][1]];
-    let goals = myXg.filter((v,i)=>shootDto[0][i].result===3)
-        .concat(yourXg.filter((v,i)=>shootDto[1][i].result===3));
+    let goals = myXg.filter((v, i) => shootDto[0][i].result === 3)
+        .concat(yourXg.filter((v, i) => shootDto[1][i].result === 3));
     let goalPoints = [];
-    let futbullImage = {path:"/img/futbull.png",width:10,height:10};
-    for(let i = 0 ; i < goals.length; i ++){
-        goalPoints.push({x:goals[i][0],y:goals[i][1],image:futbullImage});
+    let futbullImage = {path: "/img/futbull.png", width: 10, height: 10};
+    for (let i = 0; i < goals.length; i++) {
+        goalPoints.push({x: goals[i][0], y: goals[i][1], image: futbullImage});
     }
     var options = {
         series: [
@@ -1540,7 +1547,7 @@ function getXgChart(k, shootDto, myname, yourname) {
             type: 'numeric',
             labels: {
                 formatter: function (value) {
-                    return (Math.round(value*100)/100)+"XG"
+                    return (Math.round(value * 100) / 100) + "XG"
                 }
             }
         },
