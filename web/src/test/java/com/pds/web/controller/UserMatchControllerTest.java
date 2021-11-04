@@ -25,6 +25,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.filter.CharacterEncodingFilter;
 
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -83,6 +84,17 @@ class UserMatchControllerTest {
         mvc.perform(put("/users/{id}/matches", "ID")
                 .content("CODE"))
                 .andExpect(status().isNoContent());
+    }
+    @Test
+    void getDetailFromMatchCodeNotEnoughVarRequestExceptionTest() throws Exception {
+        String Code = new JSONObject().put("hello",1).toString();
+        given(matchService.getDetailMatchList(Code,"ID"))
+                .willThrow(new IllegalArgumentException());
+        mvc.perform(put("/users/{id}/matches","ID")
+        .content(Code)
+        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertEquals(IllegalArgumentException.class,getApiResultExceptionClass(result)));
     }
 
     @Test
