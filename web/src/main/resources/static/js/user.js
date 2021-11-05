@@ -1,6 +1,5 @@
 "use strict"
 $(document).ready(function () {
-
     const userid = $('#userid').text();
     if (localStorage.getItem(userid) != null) {
         let los = JSON.parse(localStorage.getItem(userid));
@@ -160,13 +159,15 @@ function clickDetail(k, dto) {
 
             getXg(transShootListForXg(myShoots) , myShoots , k);
             getXg(transShootListForXg(yourShoots) , yourShoots, k);
+            let ws = $(window).width();
             $(`#id-shoot-${k}`).click(function () {
                 if ($(`#shoot-${k}`).text().length === 0) {
+                    ws = $(window).width();
                     $(`#shoot-${k}`).append(`
                         <div class="has-text-black is-size-3-desktop is-size-5-mobile has-text-centered has-text-weight-bold">
                             <p>슈팅분포</p>
                             <hr>
-                                <p id="shoot-all-warn-${k}" class="is-size-7-mobile has-text-danger"></p>
+                                <p id="shoot-all-warn-${k}" class="is-size-7-mobile has-text-danger"></p><br>
                         </div>
                     <div id="shoot-all-${k}" class="has-text-centered is-fullwidth p-0 shootscatter">
                     </div>
@@ -180,9 +181,28 @@ function clickDetail(k, dto) {
                     setTimeout(function () {
                         getShootChart(k, shootDto, myname, yourname);
                         getXgChart(k, shootDto, myname, yourname);
-                    }, 200);
+                    }, 400);
                 }
             });
+            if(isMobile()){
+                let timer = null;
+                var delay = 1200;
+                $(window).on('resize', function(){
+                    clearTimeout(timer);
+                    if(($(`#shoot-${k}`).text().length === 0)){return;}
+                    timer = setTimeout(function(){
+                        if(Math.abs(ws-$(window).width()) > 100){
+                            $(`#shoot-all-${k}`).removeClass('shootscatter-small');
+                            $(`#xgchart-${k}`).empty();
+                            $(`#shoot-all-${k}`).empty();
+                            $(`#shoot-${k}`).empty();
+                            if($(`#id-shoot-${k}-li`).hasClass('is-active')){
+                                $(`#id-shoot-${k}`).trigger('click');
+                            }
+                        }
+                    }, delay);
+                });
+            }
             getOneMatchInfo(dto, k);
             let mySummary = dto.summaryDtoList[0];
             let yourSummary = dto.summaryDtoList[1];
@@ -259,7 +279,7 @@ function getXg(shootInfoList , shootdtoList , k) {
             if($(`#id-shoot-${k}-li`).hasClass('ele-no-react')){
                 setTimeout(function () {
                     $(`#id-shoot-${k}-li`).removeClass('ele-no-react');
-                }, 200);
+                }, 400);
             }
         }
     });
@@ -673,7 +693,6 @@ function sortDto(dto, key) {
 }
 
 function addPlayerCooc(playerDto) {
-    console.log("과자먹을래?");
     playerDto.map(value => getPlayerInfo(value.spId)
         .done(function (result) {
             setCookie(value.spId, JSON.stringify(result.data), window.location.pathname);
@@ -1121,6 +1140,9 @@ function getMatchHorBar(k, idx, summaryDtoList, keys, myname, yourname) {
                 show: false
             }
         },
+        legend: {
+            inverseOrder: true
+        },
         responsive: [
             {
                 breakpoint: 780,
@@ -1142,11 +1164,11 @@ function getMatchHorBar(k, idx, summaryDtoList, keys, myname, yourname) {
                     },
                     plotOptions: {
                         bar: {
-                            barHeight: '80%'
+                            barHeight: '90%'
                         }
                     },
                     chart: {
-                        height: 380
+                        height: 400
                     }
                 }
             }
@@ -1272,8 +1294,11 @@ function getPassChart(k, myname, passDto) {
                     },
                     plotOptions: {
                         bar: {
-                            barHeight: '45%'
+                            barHeight: '40%'
                         }
+                    },
+                    chart: {
+                        height: '50%'
                     }
                 }
             }
@@ -1313,11 +1338,11 @@ function getPossChart(k, myPo, yourPo, myname, yourname) {
     chart.render();
 }
 
-function makeDiscrete(shootDtoList, idx) {
+function makeDiscrete(shootDtoList, idx , size) {
     let result = [];
-    let colors = ["#f003fc", "#00c9ff"];
+    let colors = ["#ff0000", "#0211f8"];
     for (let i = 0; i < shootDtoList.length; i++) {
-        let buralSize = Math.pow(shootDtoList[i]["prediction"], 1.6) * 15 + 5.3;
+        let buralSize = Math.pow(shootDtoList[i]["prediction"], 1.7) * size + 5.2;
         result.push({
             seriesIndex: idx, dataPointIndex: i, size: buralSize.toFixed(2), shape: "circle"
             , fillColor: (shootDtoList[i]["result"] === 3) ? colors[idx] : ""
@@ -1330,9 +1355,7 @@ function getShootChart(k, shootDtoList, myname, yourname) {
     let dtos = [shootDtoList[0].map(v => [(v['x']), v['y']]), shootDtoList[1].map(v => [1 - (v['x']), v['y']])];
     let type = ['', '일반적인 슈팅', '정교한 슈팅', '헤더'];
     let result = ['', '유효슈팅', '벗어나는 슈팅', '득점', '골대맞음'];
-    let disc = makeDiscrete(shootDtoList[0], 0).concat(makeDiscrete(shootDtoList[1], 1));
-    let mobDisc = JSON.parse(JSON.stringify(disc));
-    mobDisc.map(val => val.size = Math.sqrt(val.size) - 0.2);
+    let disc = makeDiscrete(shootDtoList[0], 0,15).concat(makeDiscrete(shootDtoList[1], 1,15));
     var options = {
         series: [
             {
@@ -1375,7 +1398,7 @@ function getShootChart(k, shootDtoList, myname, yourname) {
         fill: {
             type: ['solid', 'solid']
         },
-        colors: ['#ff0000', '#0211f8', '#00FF00'],
+        colors: ['#f003fc', '#00c9ff', '#00FF00'],
         markers: {
             enabled: true,
             strokeWidth: 0.1,
@@ -1422,8 +1445,15 @@ function getShootChart(k, shootDtoList, myname, yourname) {
             fontSize: '19em',
             fontWeight: 800,
             position: 'top',
+            inverseOrder: true,
             labels: {
                 colors: '#FFFFFF'
+            },
+            onItemClick: {
+                toggleDataSeries: false
+            },
+            onItemHover: {
+                highlightDataSeries: false
             }
         },
         tooltip: {
@@ -1435,6 +1465,7 @@ function getShootChart(k, shootDtoList, myname, yourname) {
                 show: true,
                 formatter: function (series, value) {
                     let curData = shootDtoList[value['seriesIndex']][value['dataPointIndex']];
+                    if(curData.spId===0){return "정보없음!"}
                     let gt = (curData.goalTime >= 0) ? curData.goalTime : "45+" + (-curData.goalTime - 45);
                     return [gt + '` ' + $(`.get-${curData.spId}-name`)[0].innerText + '\n<br>' + "기대득점(" + curData.prediction.toFixed(2) + ")=>" + ((curData.hitPost) ? result[4] : result[curData.result])];
                 }
@@ -1449,35 +1480,34 @@ function getShootChart(k, shootDtoList, myname, yourname) {
                     + Math.round(series * 100) / 100 + ')\n' + gType];
                 }
             }
-        },
-        responsive: [
-            {
-                breakpoint: 480,
-                options: {
-                    markers: {
-                        discrete: mobDisc,
-                        hover: {
-                            size: 3.5
-                        }
-                    },
-                    legend: {
-                        fontSize: '10px'
-                    },
-                    tooltip: {
-                        style: {
-                            fontSize: '5px'
-                        }
-                    }
-                }
-            }
-        ]
+        }
     }
     if (isMobile()) {
-        $(`#shoot-all-warn-${k}`).text("현재 기기에서는 어시스트 경로 확인이 제한됩니다.")
+        $(`#shoot-all-warn-${k}`).text("현재 기기에서는 어시스트 경로 확인이 제한됩니다.");
         options.chart.events.dataPointSelection = undefined;
+        let sz = $('.card-header').width();
+        let mobdisc = makeDiscrete(shootDtoList[0], 0,sz*0.025).concat(makeDiscrete(shootDtoList[1], 1,sz*0.03));
+        options.markers.discrete = mobdisc;
+        if($('body').width()<=480){
+            options.chart.height = sz*0.86;
+            options.chart.width = sz*1.92;
+            $(`#shoot-all-${k}`).addClass('shootscatter-small');
+            $(`#shoot-all-${k}`).css("marginBottom", options.chart.width-$(`#shoot-all-${k}`).width());
+            options.legend.position = 'right';
+            options.legend.floating = 'true';
+            options.legend.fontSize = '10px';
+            // options.tooltip.style = {fontSize: 10+'px'};
+            $('.shootscatter-small-legend').width(sz*0.8);
+        }
+        // options.markers.hover.size = 3.5;
     }
     var chart = new ApexCharts(document.querySelector(`#shoot-all-${k}`), options);
     chart.render();
+    if(isMobile() && $('body').width()<=480){
+//        $(`#shoot-all-${k} .apexcharts-legend`).addClass('shootscatter-small-legend');
+        // $(`#shoot-all-${k} .apexcharts-tooltip`).addClass('shootscatter-small-legend');
+        // $(`#shoot-all-${k} .apexcharts-legend`).width('55%');
+    }
 }
 
 function getXgChart(k, shootDto, myname, yourname) {
