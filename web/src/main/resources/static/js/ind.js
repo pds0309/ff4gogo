@@ -10,9 +10,10 @@ $(document).ready(function () {
             });
     }
     function getPosBestPlayers(c,s){
+        let cc = parseInt(c*0.8);
         return $.ajax({
             type: 'GET',
-            url: `/stats/bestpos?cnt=${c}&season=${s}`,
+            url: `/stats/bestpos?cnt=${cc}&season=${s}`,
             error: function(){
                 $(`#id-index-bestplayer`).text(`스쿼드 정보를 불러올 수 없습니다.`);
             }
@@ -73,7 +74,7 @@ $(document).ready(function () {
             <p><small style="color: ${(v.star >= 8) ? "skyblue": "white"};background-color: black;border-radius: 100%">${v.star.toFixed(1)}</small></p>
             <figure class="image is-96x96 resp is-inline-block mt-1 is-relative">
                         <img class="mainimg- ${v.statId.player.playerId}" src="" alt="player">
-                         <img class="image" style="position: absolute;bottom: 0;left: 0;width: 25%;height: 25%" src="${v.statId.player.season.img}" alt="season">    
+                         <img class="image" style="position: absolute;bottom: 0;left: 0;width: 30%;height: 30%" src="${v.statId.player.season.img}" alt="season">    
                     </figure>
                     <p class="has-text-white"><small class="p-${v.mostPos}">${v.mostPos}</small>
                     <small>${(v.statId.player.playerName.indexOf('. ')===-1)?v.statId.player.playerName:v.statId.player.playerName.split('. ')[1]}</small>
