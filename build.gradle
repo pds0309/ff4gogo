@@ -108,7 +108,7 @@ task jacocoRootReport(type: JacocoReport) {
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.collect{
             fileTree(dir: it, excludes: [
-                    "com/pds/**/*Application.*"
+                    "com/pds/**/*Application.*","com/pds/web/config/*"
             ])
         }))
     }
