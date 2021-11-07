@@ -68,9 +68,6 @@ function getViewMatches(dto, k) {
     let basic = dto["basicDtoList"];
     let owngoals = [dto["summaryDtoList"][0].ownGoal, dto["summaryDtoList"][1].ownGoal];
     getHTMLMatches(basic, owngoals, k);
-    if (k === 0 && document.cookie.match("playerId") === null) {
-        addPlayerCooc(dto.matchPlayerDtoList[0]);
-    }
 
     $(`#id-match-btn-${k}`).click(function () {
         if (dto["matchPlayerDtoList"][0].length === 0 || dto["matchPlayerDtoList"][1].length === 0) {
@@ -215,13 +212,7 @@ function clickDetail(k, dto) {
             getPassChart(k, myname, dto.passDtoList[0]);
             let pIdSet = new Set();
             dto.matchPlayerDtoList.map(value => value.forEach(function (item) {
-                let cook = getCookie(item.spId);
-                if (cook === null) {
                     pIdSet.add(item.spId);
-                } else {
-                    let player = JSON.parse(cook);
-                    addClasForPlayer(player);
-                }
             }));
             pIdSet.forEach(value =>
                 getPlayerInfo(value)
