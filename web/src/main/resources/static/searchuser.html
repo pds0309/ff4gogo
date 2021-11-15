@@ -20,8 +20,8 @@
     <div class="hero-head">
         <div class="container">
             <input id="id-txt-user" class="input is-rounded is-size-5-desktop is-size-7-mobile has-text-centered"
-                   placeholder="닉네임 입력" onkeyup="this.value=this.value.replace(/[^a-zA-z0-9ㄱ-힣]/g,'');"><br><br>
-            <button onclick="searchUsers()"
+                   placeholder="닉네임 입력"><br><br>
+            <button id="id-btn-user"
                     class="button is-white is-size-5-desktop is-size-7-mobile is-inverted has-text-weight-bold">다른 유저 조회&nbsp;<i
                     class="fad fa-search"></i>
             </button>
@@ -42,21 +42,13 @@
             </div>
             <div class="card column is-three-fifths is-offset-2">
                 <div class="card-content">
-<!--                    <figure style="width: fit-content; display: inline-block" class="card-image is-96x96">-->
-<!--                        <img src="https://fo4.dn.nexoncdn.co.kr/live/externalAssets/common/players/p214100.png"-->
-<!--                             alt="image">-->
-<!--                    </figure>-->
-<!--                    <div>-->
-<!--                        <p class="subtitle is-black is-size-4-desktop is-size-6-mobile mb-0">루드 굴리트</p>-->
-<!--                        <small class="is-size-7">루드 굴리트 선수의 가호가 함께합니다.</small>-->
-<!--                    </div>-->
                     <div class="content is-size-4-desktop is-size-6-mobile">
                         <br>
                         <small>감독레벨</small>
                         <p class="has-text-primary has-text-weight-bold" th:text="|${user.getLevel()}|">259</p>
                         <small>최고순경</small>
                         <p class="has-text-primary-dark has-text-weight-bold" th:text="|${rank}|">월드클래스1</p>
-                        <button id="id-btn-gangsin" th:onclick="getGangsin([[${user.getUserId()}]])" disabled
+                        <button id="id-btn-gangsin" disabled
                                 class="button is-white is-size-4-desktop is-size-6-mobile is-inverted has-text-weight-bold">
                             갱신하기 &nbsp;
                             <i class="fa fa-redo"></i>
@@ -142,7 +134,7 @@
                         <div id="anal-gita">
                             <p class="has-text-weight-bold is-size-3-desktop is-size-5-mobile">
                                 <i class="fa fa-meh"></i>
-                                <i class="fa fa-plus" onclick="getAnalGita()"></i>
+                                <button id="id-anal-gita" style="outline: 0;border: 0;background: none"><i  class="fa fa-plus" style="color: white"></i></button>
                             </p>
                             <hr>
                             <div class="has-text-white has-text-left columns">
