@@ -89,6 +89,8 @@ $(document).ready(function () {
                         let r = sortDto(e.shootDtoList[0], "goalTime"), d = sortDto(e.shootDtoList[1], "goalTime"),
                             c = [r, d];
                         i(s(r), r, t), i(s(d), d, t);
+                        sorter(t,0);
+                        sorter(t,1);
                         let h = $(window).width();
                         if ($(`#id-shoot-${t}`).click(function () {
                             0 === $(`#shoot-${t}`).text().length && (h = $(window).width(), $(`#shoot-${t}`).append(`\n                        <div class="has-text-black is-size-3-desktop is-size-5-mobile has-text-centered has-text-weight-bold">\n                            <p>슈팅분포</p>\n                            <hr>\n                                <p id="shoot-all-warn-${t}" class="is-size-7-mobile has-text-danger"></p><br>\n                        </div>\n                    <div id="shoot-all-${t}" class="has-text-centered is-fullwidth p-0 shootscatter">\n                    </div>\n                    <hr>\n                        <div class="has-text-black is-size-3-desktop is-size-5-mobile has-text-centered has-text-weight-bold">\n                            <p>경기기대득점[XG] 추이</p>\n                            <hr>\n                                <p id="xgchart-${t}" class="is-size-5-desktop is-size-7-mobile"></p>\n                        </div>`), setTimeout(function () {
@@ -585,7 +587,7 @@ $(document).ready(function () {
     }
 
     function m(t, e) {
-        return `<table class="table is-size-6-desktop is-size-7-mobile" style="margin: 0 auto">\n  <thead>\n    <tr>\n      <th class="mytable-no-scroll"><abbr title="선수">PLAYER</abbr></th>\n      <th><abbr title="포지션">POS</abbr></th>\n      <th><abbr title="평점">STAR</abbr><i class="fa fa-angle-down" onclick="tbSorter(${t},${e},2,this)"></i></th>\n      <th><abbr title="슈팅">SHOT</abbr><i class="fa fa-angle-down" onclick="tbSorter(${t},${e},3,this)"></i></th>\n      <th><abbr title="유효슈팅">E_SHOT</abbr><i class="fa fa-angle-down" onclick="tbSorter(${t},${e},4,this)"></i></th>\n      <th><abbr title="득점">GOL</abbr><i class="fa fa-angle-down" onclick="tbSorter(${t},${e},5,this)"></i></th>\n      <th><abbr title="어시스트">ASI</abbr><i class="fa fa-angle-down" onclick="tbSorter(${t},${e},6,this)"></i></th>\n      <th><abbr title="패스시도">PAS</abbr><i class="fa fa-angle-down" onclick="tbSorter(${t},${e},7,this)"></i></th>\n      <th><abbr title="패스성공">S_PAS</abbr><i class="fa fa-angle-down" onclick="tbSorter(${t},${e},8,this)"></i></th>\n      <th><abbr title="드리블시도">DRIB</abbr><i class="fa fa-angle-down" onclick="tbSorter(${t},${e},9,this)"></i></th>\n      <th><abbr title="드리블성공">S_DRIB</abbr><i class="fa fa-angle-down" onclick="tbSorter(${t},${e},10,this)"></i></th>\n      <th><abbr title="가로채기">INCT</abbr></th>\n      <th><abbr title="선방">BLOK</abbr></th>\n      <th><abbr title="태클시도">TAKLE</abbr></th>\n      <th><abbr title="태클성공">S_TAKLE</abbr></th>\n      <th><abbr title="경고">YCARD</abbr></th>\n      <th><abbr title="퇴장">RCARD</abbr></th>\n    </tr>\n  </thead>\n  <tbody id="tbod-${t}-${e}">\n  </tbody>\n</table>`
+        return `<table class="table is-size-6-desktop is-size-7-mobile" style="margin: 0 auto">\n  <thead>\n    <tr>\n      <th class="mytable-no-scroll"><abbr title="선수">PLAYER</abbr></th>\n      <th><abbr title="포지션">POS</abbr></th>\n      <th><abbr title="평점">STAR</abbr><a id="id-${t}-${e}-2"><i class="fa fa-angle-down"></i></a></th>\n      <th><abbr title="슈팅">SHOT</abbr><a id="id-${t}-${e}-3"><i class="fa fa-angle-down"></i></a></th>\n      <th><abbr title="유효슈팅">E_SHOT</abbr><a id="id-${t}-${e}-4"><i class="fa fa-angle-down"></i></a></th>\n      <th><abbr title="득점">GOL</abbr><a id="id-${t}-${e}-5"><i class="fa fa-angle-down"></i></a></th>\n      <th><abbr title="어시스트">ASI</abbr><a id="id-${t}-${e}-6"><i class="fa fa-angle-down"></i></a></th>\n      <th><abbr title="패스시도">PAS</abbr><a id="id-${t}-${e}-7"><i class="fa fa-angle-down"></i></a></th>\n      <th><abbr title="패스성공">S_PAS</abbr><a id="id-${t}-${e}-8"><i class="fa fa-angle-down"></i></a></th>\n      <th><abbr title="드리블시도">DRIB</abbr><a id="id-${t}-${e}-9"><i class="fa fa-angle-down"></i></a></th>\n      <th><abbr title="드리블성공">S_DRIB</abbr><a id="id-${t}-${e}-10"><i class="fa fa-angle-down"></i></a></th>\n      <th><abbr title="가로채기">INCT</abbr></th>\n      <th><abbr title="선방">BLOK</abbr></th>\n      <th><abbr title="태클시도">TAKLE</abbr></th>\n      <th><abbr title="태클성공">S_TAKLE</abbr></th>\n      <th><abbr title="경고">YCARD</abbr></th>\n      <th><abbr title="퇴장">RCARD</abbr></th>\n    </tr>\n  </thead>\n  <tbody id="tbod-${t}-${e}">\n  </tbody>\n</table>`
     }
 
     function f(t, e, s) {
@@ -623,7 +625,13 @@ $(document).ready(function () {
     function v(t) {
         return $.ajax({type: "GET", url: `/players/info?pid=${t}`})
     }
-
+    function sorter(t , e){
+        for(let i = 2; i <= 10; i++){
+            $(`#id-${t}-${e}-${i}`).on("click",function(){
+               tbSorter(t,e,i,$(`#id-${t}-${e}-${i} > svg`));
+            });
+        }
+    }
     $("#id-derbogi > .button").click(function () {
         !function (t) {
             let s = $(".clas").length, i = JSON.parse(localStorage.getItem(t)).allcode, a = i.slice(s, s + 5);
