@@ -1,4 +1,4 @@
-# ff4gogo
+# f4gogo
 
 ---
 
@@ -15,34 +15,52 @@
 
 #### 서비스 소개
 
-- 준비중입니다.
+- [링크](https://fds4g.xyz)
+
+NEXONDEVELOPERS 에서 제공되는 피파온라인4 open-api 를 활용한 Springboot 기반 게임 이용자 순위경기 전적 조회 서비스 미니 프로젝트 입니다.
+
+랭크 경기 기록에 대한 데이터들을 보다 시각적으로 보여주어 사용자가 더 나은 인사이트를 빠르게 얻을 수 있으며 
+가볍게 들어와 조회하고 가볍게 나갈 수 있는 그런 서비스가 되었으면 좋겠다는 마음가짐으로 개발하였습니다.
 
 
+<br>
 
-#### 환경
+#### 서비스 전체 흐름
+
+
+![f4gogoarc](https://user-images.githubusercontent.com/76927397/142144575-c38f513a-d415-43f5-ac98-e579e126e0fd.PNG)
+
+<br>
+
+#### 기능 및 기술
+
+준비중입니다.
+
+
+#### 주요 이슈
+
+* [서버설정 기록 #23](https://github.com/pds0309/ff4gogo/issues/23)
+
+* [기계학습 모델을 통해 기대득점 수치 보여주기 #21](https://github.com/pds0309/ff4gogo/issues/21)
+
 
 ##### 기타
 
 * 개발도구
   * Intellij ultimate
-* 빌드 , 테스트 자동화
-  * TravisCI
-* 배포 자동화
-  * AWS CodeDeploy - S3
-* 버전
-  * Github
-  * Github Actions - Release Drafter
-* Code Coverage , Test
-  * CoverAlls
-  * Jacoco 
-  * Sonarlint
-  * ~Code Inspector~ 
+* 빌드, 테스트, 배포
+  * TravisCI, AWS CodeDeploy, S3
+
   
 ##### Back
 
 * OS
   * 개발 : Window 10 64
-  * 배포 : Oracle Cloud Ubuntu 20.04
+  * 배포 : Oracle Cloud Ubuntu 20.04, AWS EC2 Ubuntu 20.04
+
+  
+* 웹서버 : nginx
+  
 
 * Language
   * Java 8
@@ -69,3 +87,4 @@
 * JavaScript 
     * [apexchart](https://apexcharts.com/)
 * Jquery 3.6
+
