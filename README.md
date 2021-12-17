@@ -1,4 +1,4 @@
-# f4gogo
+# ff4gogo
 
 ---
 
@@ -15,12 +15,10 @@
 
 #### 서비스 소개
 
-- [링크](https://fds4g.xyz)
 
-NEXONDEVELOPERS 에서 제공되는 피파온라인4 open-api 를 활용한 Springboot 기반 게임 이용자 순위경기 전적 조회 서비스 미니 프로젝트 입니다.
+NEXONDEVELOPERS 에서 제공되는 피파온라인4 open-api 를 활용한 게임 이용자 순위경기 전적 조회 서비스
 
-랭크 경기 기록에 대한 데이터들을 보다 시각적으로 보여주어 사용자가 더 나은 인사이트를 빠르게 얻을 수 있으며 
-가볍게 들어와 조회하고 가볍게 나갈 수 있는 그런 서비스가 되었으면 좋겠다는 마음가짐으로 개발하였습니다.
+랭크 경기 기록에 대한 데이터들을 보다 시각적으로 보여주어 사용자가 더 나은 인사이트를 빠르게 얻고 가볍게 접속해 조회할 수 있도록 구성
 
 
 <br>
@@ -32,9 +30,23 @@ NEXONDEVELOPERS 에서 제공되는 피파온라인4 open-api 를 활용한 Spri
 
 <br>
 
-#### 기능 및 기술
+#### 주요 기능
 
-준비중입니다.
+* 메인페이지에서 랭커들의 TOP 선수들 확인
+  * 일정 시간 마다 스케줄링으로 업데이트 되는 데이터를 조회하는 api이기 때문에 웹 서버 캐싱 적용
+
+<img src="https://user-images.githubusercontent.com/76927397/218298218-695d0d61-a833-468b-baa0-69612814afb3.JPG" width=700/>
+
+* 게임 이용자 전적 검색 및 조회
+  * 해당 사용자 최근 요약 기록, 전적 목록 조회
+  * 전적 상세 조회, 기대득점 모델링 api를 활용해 경기 기대득점 시각화하여 제공
+
+
+<img src="https://user-images.githubusercontent.com/76927397/218298687-9c5e1ac4-05b3-4a61-b7de-4cc0ea30dd99.gif" width=50%/>
+
+<img src="https://user-images.githubusercontent.com/76927397/218298701-54d4774a-b00f-4cf5-bf85-7efb47edaaee.gif" width=50%/>
+
+
 
 
 #### 주요 이슈
@@ -53,11 +65,6 @@ NEXONDEVELOPERS 에서 제공되는 피파온라인4 open-api 를 활용한 Spri
 
   
 ##### Back
-
-* OS
-  * 개발 : Window 10 64
-  * 배포 : Oracle Cloud Ubuntu 20.04, AWS EC2 Ubuntu 20.04
-
   
 * 웹서버 : nginx
   
